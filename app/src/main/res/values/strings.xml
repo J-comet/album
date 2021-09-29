@@ -1,0 +1,48 @@
+<resources>
+    <string name="app_name">Together Album</string>
+
+    <string name="str_network_fail">네트워크 연결이 끊겼습니다</string>
+
+    <string name="str_common_01">회원가입</string>
+    <string name="str_common_02">로그인</string>
+    <string name="str_common_03">비밀번호</string>
+    <string name="str_common_04">간편가입</string>
+    <string name="str_common_05">이메일</string>
+    <string name="str_common_06">비밀번호 확인</string>
+    <string name="str_common_07">입력한 정보를 확인해주세요</string>
+    <string name="str_common_08">기본 권한 거부시 앱을 이용 제한</string>
+    <string name="str_common_09">이름</string>
+    <string name="str_common_10">아기와의 관계</string>
+    <string name="str_common_11">성별 선택</string>
+
+    <string name="str_cancel_selected">선택 취소</string>
+    <string name="str_need_album">함께 나눈 추억을\n 공유해보세요</string>
+
+
+    <string name="str_email_input">이메일을 입력해주세요</string>
+    <string name="str_password_input">비밀번호를 입력해주세요</string>
+    <string name="str_email_format">이메일 형식에 맞게 입력해주세요</string>
+    <string name="str_password_format">영문자/숫자 포함 9~16자</string>
+    <string name="str_password_check">비밀번호를 확인해주세요</string>
+    <string name="str_password_check_input">한번더 입력해주세요</string>
+
+    <string name="str_send_email">입력한 이메일로 인증메일을 보냈습니다</string>
+    <string name="str_send_email_fail">인증메일 보내는데 실패했습니다</string>
+    <string name="str_signup_fail">이미 가입되있거나 존재하지 않는 이메일</string>
+    <string name="str_verify_email">이메일 인증을 해주세요</string>
+    <string name="str_check_info">입력한 정보를 확인하세요</string>
+
+    <string name="str_menu_01">앨범</string>
+    <string name="str_menu_02">근황</string>
+    <string name="str_menu_03">가족</string>
+    <string name="str_menu_04">설정</string>
+
+    <string name="str_album_collection_01">개별 페이지</string>
+    <string name="str_album_collection_02">즐겨찾기</string>
+    <string name="str_album_collection_03">연도별</string>
+
+    <string name="str_add_01">전체 공개</string>
+    <string name="str_add_02">부부 공개</string>
+    <string name="str_add_03">등록하기</string>
+
+</resources>

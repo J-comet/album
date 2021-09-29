@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="arr_gender">
+        <item></item>
+        <item>남자</item>
+        <item>여자</item>
+        <item>지정 안함</item>
+    </string-array>
+
+    <string-array name="arr_family">
+        <item></item>
+        <item>엄마</item>
+        <item>아빠</item>
+        <item>할머니</item>
+        <item>할아버지</item>
+        <item>외숙부모 / 이모·부</item>
+        <item>백부모 / 숙부모 / 고모·부</item>
+        <item>아기</item>
+        <item>그 외 가족</item>
+    </string-array>
+
+</resources>
