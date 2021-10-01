@@ -21,6 +21,8 @@ import hs.project.album.BaseActivity
 import hs.project.album.MyApplication
 import hs.project.album.R
 import hs.project.album.databinding.ActivityMainBinding
+import hs.project.album.util.displayToast
+import hs.project.album.util.resString
 import hs.project.album.view.add.AddImageDialog
 import hs.project.album.view.album.AlbumFrag
 import hs.project.album.view.family.FamilyFrag
@@ -66,7 +68,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main)  
                 ) {
                     openGallery()
                 } else {
-                    showToast(resString(R.string.str_common_08))
+                    displayToast(resString(R.string.str_common_08))
                 }
             }
 
@@ -93,7 +95,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main)  
                     }
                     Log.d("이미지", "$currentImageUri")
                 } else if (result.resultCode == RESULT_CANCELED) {
-                    showToast(resString(R.string.str_cancel_selected))
+                    displayToast(resString(R.string.str_cancel_selected))
                 }
             }
     }
@@ -215,7 +217,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main)  
                 if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
                     openGallery()
                 } else {
-                    showToast(resString(R.string.str_common_08))
+                    displayToast(resString(R.string.str_common_08))
                 }
             }
         }

@@ -14,6 +14,8 @@ import hs.project.album.Constant
 import hs.project.album.MyApplication
 import hs.project.album.R
 import hs.project.album.databinding.ActivitySignupBinding
+import hs.project.album.util.displayToast
+import hs.project.album.util.resString
 
 
 class SignupActivity : BaseActivity<ActivitySignupBinding>(R.layout.activity_signup),
@@ -81,11 +83,11 @@ class SignupActivity : BaseActivity<ActivitySignupBinding>(R.layout.activity_sig
         val email: String = binding.tilEmail.editText?.text.toString()
 
         if (email.isEmpty()) {
-            binding.tilEmail.error = resources.getString(R.string.str_email_input)
+            binding.tilEmail.error = resString(R.string.str_email_input)
             validEmailCheck = false
             signUpBtnStatus(validEmailCheck, validPasswordCheck, validPasswordConfirm)
         } else if (!isEmailFormat(email)) {
-            binding.tilEmail.error = resources.getString(R.string.str_email_format)
+            binding.tilEmail.error = resString(R.string.str_email_format)
             validEmailCheck = false
             signUpBtnStatus(validEmailCheck, validPasswordCheck, validPasswordConfirm)
         } else {
@@ -100,11 +102,11 @@ class SignupActivity : BaseActivity<ActivitySignupBinding>(R.layout.activity_sig
         val password = binding.tilPassword.editText?.text.toString()
 
         if (password.isEmpty()) {
-            binding.tilPassword.error = resources.getString(R.string.str_password_input)
+            binding.tilPassword.error = resString(R.string.str_password_input)
             validPasswordCheck = false
             signUpBtnStatus(validEmailCheck, validPasswordCheck, validPasswordConfirm)
         } else if (!isPasswordFormat(password)) {
-            binding.tilPassword.error = resources.getString(R.string.str_password_format)
+            binding.tilPassword.error = resString(R.string.str_password_format)
             validPasswordCheck = false
             signUpBtnStatus(validEmailCheck, validPasswordCheck, validPasswordConfirm)
         } else {
@@ -152,13 +154,13 @@ class SignupActivity : BaseActivity<ActivitySignupBinding>(R.layout.activity_sig
                                 val uid = MyApplication.firebaseAuth.currentUser!!.uid
                                 registerUserFireStore(uid,email)
                             } else {
-                                showToast(resString(R.string.str_send_email_fail))
+                                displayToast(resString(R.string.str_send_email_fail))
                                 Log.e("SignupActivity", verifyTask.exception.toString())
                             }
                             binding.loadingView.visibility = View.INVISIBLE
                         }
                 } else {
-                    showToast(resString(R.string.str_signup_fail))
+                    displayToast(resString(R.string.str_signup_fail))
                     binding.loadingView.visibility = View.INVISIBLE
                     Log.e("SignupActivity", createTask.exception.toString())
                 }
@@ -177,7 +179,7 @@ class SignupActivity : BaseActivity<ActivitySignupBinding>(R.layout.activity_sig
             .set(user)
             .addOnCompleteListener {
                 if (it.isSuccessful) {
-                    showToast(resString(R.string.str_send_email))
+                    displayToast(resString(R.string.str_send_email))
                     finish()
                 }
             }
@@ -196,10 +198,10 @@ class SignupActivity : BaseActivity<ActivitySignupBinding>(R.layout.activity_sig
                             binding.tilPasswordCheck.editText?.text.toString()
                         )
                     } else {
-                        showToast(resString(R.string.str_common_07))
+                        displayToast(resString(R.string.str_common_07))
                     }
                 } else {
-                    showToast(resString(R.string.str_network_fail))
+                    displayToast(resString(R.string.str_network_fail))
                 }
             }
         }

@@ -16,6 +16,8 @@ import hs.project.album.adapter.AlbumMonthAdapter
 import hs.project.album.data.AlbumMonth
 import hs.project.album.databinding.ActivityMainBinding
 import hs.project.album.databinding.FragmentAlbumBinding
+import hs.project.album.util.getCurMonth
+import hs.project.album.util.getCurYear
 import hs.project.album.view.MainActivity
 import java.text.SimpleDateFormat
 import java.util.*

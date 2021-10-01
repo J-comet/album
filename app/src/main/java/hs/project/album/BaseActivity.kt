@@ -14,6 +14,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import com.google.android.material.snackbar.BaseTransientBottomBar.ANIMATION_MODE_SLIDE
 import com.google.android.material.snackbar.Snackbar
+import hs.project.album.util.resString
 
 
 abstract class BaseActivity<T : ViewDataBinding>(@LayoutRes private val layoutResId: Int) :
@@ -41,21 +42,12 @@ abstract class BaseActivity<T : ViewDataBinding>(@LayoutRes private val layoutRe
         _binding = null
     }
 
-    fun showToast(msg: String) {
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
-    }
-
     // 로그인할때 인증실패시 띄워주도록 할 것
     fun showSnackBar(v: View,strId: Int){
         val slideSnackBar = Snackbar.make(v, resString(strId), 2000)
         slideSnackBar.animationMode = ANIMATION_MODE_SLIDE
         slideSnackBar.show()
     }
-
-    fun resString(strId: Int) : String{
-        return resources.getString(strId)
-    }
-
 
     fun isNetworkConnected(context: Context): Boolean {
         var result = false

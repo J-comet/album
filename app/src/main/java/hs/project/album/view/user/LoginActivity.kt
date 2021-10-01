@@ -17,6 +17,8 @@ import hs.project.album.MyApplication
 import hs.project.album.R
 import hs.project.album.adapter.SlideViewPagerAdapter
 import hs.project.album.databinding.ActivityLoginBinding
+import hs.project.album.util.displayToast
+import hs.project.album.util.resString
 import hs.project.album.view.MainActivity
 
 
@@ -128,10 +130,10 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>(R.layout.activity_login
 
                 when {
                     binding.etEmail.text.toString().isEmpty() -> {
-                        showToast(resString(R.string.str_email_input))
+                        displayToast(resString(R.string.str_email_input))
                     }
                     binding.etPassword.text.toString().isEmpty() -> {
-                        showToast(resString(R.string.str_password_input))
+                        displayToast(resString(R.string.str_password_input))
                     }
                     else -> {
                         if (isNetworkConnected(applicationContext)) {
@@ -145,7 +147,7 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>(R.layout.activity_login
                                 )
                             }, 600)
                         } else {
-                            showToast(resString(R.string.str_network_fail))
+                            displayToast(resString(R.string.str_network_fail))
                         }
                     }
                 }
@@ -177,10 +179,9 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>(R.layout.activity_login
                         startActivity(i)
                     } else {
                         showSnackBar(binding.btnLogin.rootView,R.string.str_verify_email)
-//                        showToast(resString(R.string.str_verify_email))
                     }
                 } else {
-                    showToast(resString(R.string.str_check_info))
+                    displayToast(resString(R.string.str_check_info))
                 }
             }
 

@@ -41,33 +41,6 @@ abstract class BaseFragment<T : ViewDataBinding>(@LayoutRes private val layoutRe
         _binding = null
     }
 
-    fun getCurYear(): String {
-        val yearFormat = SimpleDateFormat("yyyy", Locale.getDefault())
-        return yearFormat.format(Calendar.getInstance().time)
-    }
-
-    fun getCurMonth(): String {
-        val monthFormat = SimpleDateFormat("MM", Locale.getDefault())
-        return monthFormat.format(Calendar.getInstance().time)
-    }
-
-    fun getTodayDate(): Long {
-        return Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }.time.time
-    }
-
-    fun fragShowToast(msg: String) {
-        Toast.makeText(requireActivity(), msg, Toast.LENGTH_SHORT).show()
-    }
-
-    fun fragResString(strId: Int): String {
-        return requireActivity().resources.getString(strId)
-    }
-
     fun fragIsNetworkConnected(context: Context): Boolean {
         var result = false
         val cm =
