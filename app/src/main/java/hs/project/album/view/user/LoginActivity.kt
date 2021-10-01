@@ -17,8 +17,7 @@ import hs.project.album.MyApplication
 import hs.project.album.R
 import hs.project.album.adapter.SlideViewPagerAdapter
 import hs.project.album.databinding.ActivityLoginBinding
-import hs.project.album.util.displayToast
-import hs.project.album.util.resString
+import hs.project.album.util.*
 import hs.project.album.view.MainActivity
 
 
@@ -136,9 +135,8 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>(R.layout.activity_login
                         displayToast(resString(R.string.str_password_input))
                     }
                     else -> {
-                        if (isNetworkConnected(applicationContext)) {
-                            binding.loadingView.visibility = View.VISIBLE
-
+                        if (isNetworkConnected()) {
+                            binding.loadingView.visible()
                             // 강제로 loading 화면 천천히 닫히게 하기위해 handler
                             Handler(mainLooper).postDelayed({
                                 login(
@@ -171,6 +169,9 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>(R.layout.activity_login
                 if (loginTask.isSuccessful) {
                     if (MyApplication.firebaseAuth.currentUser?.isEmailVerified!!) {
 
+                        /**
+                         *  추후에 로그인 확인 작업은 preference 에 저장된 값으로 확인할 것
+                         */
                         MyApplication.prefs.setString(Constant.PREFERENCE_KEY.LOGIN_USER_ID, MyApplication.firebaseAuth.currentUser!!.uid)
 
                         val i = Intent(this, MainActivity::class.java)
@@ -187,7 +188,7 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>(R.layout.activity_login
 
         // 강제로 loading 화면 띄우기 위해 handler
         Handler(mainLooper).postDelayed({
-            binding.loadingView.visibility = View.GONE
+            binding.loadingView.hide(0)
         }, 600)
     }
 

@@ -24,6 +24,7 @@ import hs.project.album.R
 import hs.project.album.data.AddBabyData
 import hs.project.album.databinding.DialogAddBabyBinding
 import hs.project.album.util.displayToast
+import hs.project.album.util.resString
 import hs.project.album.viewmodel.AddBabyVM
 import java.text.SimpleDateFormat
 import java.util.*
@@ -265,7 +266,7 @@ class AddBabyDialog : DialogFragment(), View.OnClickListener {
                     model.setData(addBabyData)
                     dismiss()
                 } else {
-                    requireActivity().displayToast("모든 정보를 입력해주세요")
+                    requireActivity().displayToast(requireActivity().resString(R.string.str_please_info))
                 }
             }
         }

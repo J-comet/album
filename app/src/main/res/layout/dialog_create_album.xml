@@ -53,7 +53,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
             android:layout_marginTop="24dp"
-            android:text="회원님의 정보를 입력해주세요"
+            android:text="@string/str_please_info_title"
             android:textColor="@color/black"
             android:textSize="12dp"
             app:layout_constraintStart_toStartOf="parent"
@@ -67,7 +67,7 @@
             android:layout_marginStart="24dp"
             android:layout_marginTop="5dp"
             android:layout_marginEnd="24dp"
-            android:hint="@string/str_common_09"
+            android:hint="@string/str_common_12"
             app:counterEnabled="true"
             app:counterMaxLength="10"
             app:layout_constraintEnd_toEndOf="parent"
@@ -116,7 +116,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="50dp"
-            android:text="사랑스러운 아기를 등록해주세요"
+            android:text="@string/str_add_baby"
             android:textColor="@color/black"
             android:textSize="12dp"
             app:layout_constraintStart_toStartOf="@+id/textView7"
@@ -151,7 +151,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
-                android:text="아직 등록된 아기가 없어요"
+                android:text="@string/str_not_found_baby"
                 android:textColor="@color/color_808080"
                 android:textSize="12dp"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -196,7 +196,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="생성 하기"
+                android:text="@string/str_create"
                 android:textColor="@color/white"
                 android:textSize="16dp"
                 android:textStyle="bold"
@@ -207,6 +207,17 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <include
+            android:id="@+id/loading_view"
+            layout="@layout/loading"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

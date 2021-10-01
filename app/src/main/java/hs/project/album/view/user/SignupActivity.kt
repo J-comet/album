@@ -14,8 +14,7 @@ import hs.project.album.Constant
 import hs.project.album.MyApplication
 import hs.project.album.R
 import hs.project.album.databinding.ActivitySignupBinding
-import hs.project.album.util.displayToast
-import hs.project.album.util.resString
+import hs.project.album.util.*
 
 
 class SignupActivity : BaseActivity<ActivitySignupBinding>(R.layout.activity_signup),
@@ -157,11 +156,11 @@ class SignupActivity : BaseActivity<ActivitySignupBinding>(R.layout.activity_sig
                                 displayToast(resString(R.string.str_send_email_fail))
                                 Log.e("SignupActivity", verifyTask.exception.toString())
                             }
-                            binding.loadingView.visibility = View.INVISIBLE
+                            binding.loadingView.hide(0)
                         }
                 } else {
                     displayToast(resString(R.string.str_signup_fail))
-                    binding.loadingView.visibility = View.INVISIBLE
+                    binding.loadingView.hide(0)
                     Log.e("SignupActivity", createTask.exception.toString())
                 }
             }
@@ -170,9 +169,12 @@ class SignupActivity : BaseActivity<ActivitySignupBinding>(R.layout.activity_sig
     // fireStore 에 userInfo 등록
     private fun registerUserFireStore(uid: String, email: String) {
 
+        val albumList: MutableList<String> = ArrayList()
+
         val user = hashMapOf(
             "uid" to uid,
-            "email" to email
+            "email" to email,
+            "album_list" to albumList
         )
 
         MyApplication.fireStoreDB.collection(Constant.FIREBASE_DOC.USER_LIST).document(email)
@@ -190,9 +192,9 @@ class SignupActivity : BaseActivity<ActivitySignupBinding>(R.layout.activity_sig
     override fun onClick(v: View?) {
         when (v?.id) {
             binding.btnSignup.id -> {
-                if (isNetworkConnected(applicationContext)) {
+                if (isNetworkConnected()) {
                     if (validSignUp) {
-                        binding.loadingView.visibility = View.VISIBLE
+                        binding.loadingView.visible()
                         userSignUp(
                             binding.tilEmail.editText?.text.toString(),
                             binding.tilPasswordCheck.editText?.text.toString()

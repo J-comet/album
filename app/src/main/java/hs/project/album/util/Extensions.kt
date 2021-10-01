@@ -1,8 +1,12 @@
 package hs.project.album.util
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -43,4 +47,30 @@ fun getTodayDate(): Long {
         set(Calendar.SECOND, 0)
         set(Calendar.MILLISECOND, 0)
     }.time.time
+}
+
+fun Context.isNetworkConnected(): Boolean {
+    var result = false
+    val cm = getSystemService(AppCompatActivity.CONNECTIVITY_SERVICE) as ConnectivityManager
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        val capabilities = cm.getNetworkCapabilities(cm.activeNetwork)
+        if (capabilities != null) {
+            if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                result = true
+            } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                result = true
+            }
+        }
+    } else {  // API 23보다 아래 기기
+        val activeNetwork = cm.activeNetworkInfo
+        if (activeNetwork != null) {
+            // connected to the internet
+            if (activeNetwork.type == ConnectivityManager.TYPE_WIFI) {
+                result = true
+            } else if (activeNetwork.type == ConnectivityManager.TYPE_MOBILE) {
+                result = true
+            }
+        }
+    }
+    return result
 }

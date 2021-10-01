@@ -14,7 +14,7 @@ object Constant {
     interface FIREBASE_DOC {
         companion object{
             const val USER_LIST = "user_list"
-            const val TEAM_LIST = "team_info"
+            const val ALBUM_LIST = "album_list"
         }
     }
 }

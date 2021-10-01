@@ -18,6 +18,8 @@ import hs.project.album.databinding.ActivityMainBinding
 import hs.project.album.databinding.FragmentAlbumBinding
 import hs.project.album.util.getCurMonth
 import hs.project.album.util.getCurYear
+import hs.project.album.util.hide
+import hs.project.album.util.visible
 import hs.project.album.view.MainActivity
 import java.text.SimpleDateFormat
 import java.util.*
@@ -41,7 +43,9 @@ class AlbumFrag : BaseFragment<FragmentAlbumBinding>(R.layout.fragment_album) {
         childFragmentManager.beginTransaction().replace(
             R.id.flayout_album_container,
             AlbumView02Frag.newInstance()
-        ).commit()
+        )
+            .addToBackStack(null)
+            .commit()
         init()
         initRecyclerView()
     }
@@ -77,6 +81,14 @@ class AlbumFrag : BaseFragment<FragmentAlbumBinding>(R.layout.fragment_album) {
             layoutManager = manager
             scrollToPosition(0)
         }
+    }
+
+    fun visibleLoading() {
+        binding.loadingView.visible()
+    }
+
+    fun hideLoading() {
+        binding.loadingView.hide(0)
     }
 
 //    override fun onClick(v: View?) {

@@ -10,6 +10,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import com.google.android.material.snackbar.BaseTransientBottomBar.ANIMATION_MODE_SLIDE
@@ -49,40 +50,44 @@ abstract class BaseActivity<T : ViewDataBinding>(@LayoutRes private val layoutRe
         slideSnackBar.show()
     }
 
-    fun isNetworkConnected(context: Context): Boolean {
-        var result = false
-        val cm = context.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val capabilities = cm.getNetworkCapabilities(cm.activeNetwork)
-            if (capabilities != null) {
-                if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-                    result = true
-                } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
-                    result = true
-                }
+    override fun onBackPressed() {
+
+        val count = supportFragmentManager.backStackEntryCount
+
+        when {
+            count > 0 -> {
+                supportFragmentManager.popBackStack()
             }
-        } else {  // API 23보다 아래 기기
-            val activeNetwork = cm.activeNetworkInfo
-            if (activeNetwork != null) {
-                // connected to the internet
-                if (activeNetwork.type == ConnectivityManager.TYPE_WIFI) {
-                    result = true
-                } else if (activeNetwork.type == ConnectivityManager.TYPE_MOBILE) {
-                    result = true
-                }
+            else -> {
+                super.onBackPressed()
             }
         }
-        return result
     }
 
-//    fun netWorkCheck(context: Context) {
-//        val connection = NetworkConnection(context)
-//        connection.observe(this, { isConnected ->
-//            if (isConnected) {
-//                showToast("인터넷 연결 활성화")
-//            } else {
-//                showToast("인터넷 연결끊김")
+//    fun isNetworkConnected(context: Context): Boolean {
+//        var result = false
+//        val cm = context.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            val capabilities = cm.getNetworkCapabilities(cm.activeNetwork)
+//            if (capabilities != null) {
+//                if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+//                    result = true
+//                } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+//                    result = true
+//                }
 //            }
-//        })
+//        } else {  // API 23보다 아래 기기
+//            val activeNetwork = cm.activeNetworkInfo
+//            if (activeNetwork != null) {
+//                // connected to the internet
+//                if (activeNetwork.type == ConnectivityManager.TYPE_WIFI) {
+//                    result = true
+//                } else if (activeNetwork.type == ConnectivityManager.TYPE_MOBILE) {
+//                    result = true
+//                }
+//            }
+//        }
+//        return result
 //    }
+
 }
