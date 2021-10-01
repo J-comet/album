@@ -1,7 +1,8 @@
 package hs.project.album.dialog
 
-
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.util.SparseIntArray
 import android.view.LayoutInflater
@@ -20,7 +21,9 @@ import com.aminography.primedatepicker.picker.PrimeDatePicker
 import com.aminography.primedatepicker.picker.callback.SingleDayPickCallback
 import com.aminography.primedatepicker.picker.theme.LightThemeFactory
 import hs.project.album.R
+import hs.project.album.data.AddBabyData
 import hs.project.album.databinding.DialogAddBabyBinding
+import hs.project.album.util.displayToast
 import hs.project.album.viewmodel.AddBabyVM
 import java.text.SimpleDateFormat
 import java.util.*
@@ -30,7 +33,10 @@ class AddBabyDialog : DialogFragment(), View.OnClickListener {
 
     private lateinit var binding: DialogAddBabyBinding
     private var spinnerResult = ""
-    lateinit var model: AddBabyVM
+    private lateinit var model: AddBabyVM
+    private var isName = false
+    private var isGender = false
+    private var isBirthday = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,13 +59,30 @@ class AddBabyDialog : DialogFragment(), View.OnClickListener {
         init()
     }
 
-
     private fun init() {
         binding.btnBack.setOnClickListener(this)
         binding.clayoutBtnRegister.setOnClickListener(this)
         binding.btnDatePicker.setOnClickListener(this)
 
         setSpinnerView()
+
+        binding.tilName.editText?.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                val name: String = binding.tilName.editText?.text.toString()
+                isName = name.isNotEmpty()
+            }
+        })
+
+//        이대로 하면 모음 입력 안됨
+//        binding.tilName.editText?.filters =
+//            arrayOf(InputFilter{ source, start, end, dest, dstart, dend ->
+//                val ps = Pattern.compile("^[ㄱ-ㅣ가-힣]*$")
+//                if (!ps.matcher(source).matches()) {
+//                    ""
+//                } else null
+//            })
     }
 
     private fun setSpinnerView() {
@@ -78,6 +101,7 @@ class AddBabyDialog : DialogFragment(), View.OnClickListener {
                 id: Long
             ) {
                 spinnerResult = spinnerItems[position].toString()
+                isGender = spinnerResult.isNotEmpty()
             }
         }
 
@@ -120,7 +144,7 @@ class AddBabyDialog : DialogFragment(), View.OnClickListener {
                 get() = BackgroundShapeType.CIRCLE
 
             override val calendarViewPickedDayBackgroundColor: Int
-                get() = ContextCompat.getColor(requireActivity(),R.color.color_4facfe)
+                get() = ContextCompat.getColor(requireActivity(), R.color.color_4facfe)
 
             override val calendarViewTodayLabelTextColor: Int
                 get() = getColor(R.color.blue500)
@@ -152,13 +176,12 @@ class AddBabyDialog : DialogFragment(), View.OnClickListener {
 
             override val selectionBarBackgroundColor: Int
                 get() = getColor(R.color.color_6495ed)
-            
         }
 
         val callback = SingleDayPickCallback { day ->
             val strBirthDay = day.longDateString
 
-            val arr = strBirthDay.split("," , " ")
+            val arr = strBirthDay.split(",", " ")
             println(arr)
             val resultBirthDay =
                 arr[4].trim() + "년 " +
@@ -170,6 +193,7 @@ class AddBabyDialog : DialogFragment(), View.OnClickListener {
             Log.e("birth", resultBirthDay)
 
             showDdayText(arr)
+            isBirthday = true
         }
 
         val maxDate = newInstance(CalendarType.CIVIL, Locale.getDefault())
@@ -193,7 +217,7 @@ class AddBabyDialog : DialogFragment(), View.OnClickListener {
 
     private fun showDdayText(arr: List<String>) {
         val year = arr[4].trim()
-        var month = arr[3].replace("월","").trim()
+        var month = arr[3].replace("월", "").trim()
         var day = arr[2].trim()
 
         // 'month' 한글자 일 때
@@ -219,14 +243,6 @@ class AddBabyDialog : DialogFragment(), View.OnClickListener {
         binding.tvDday.text = "태어난지 ${(today - startDate) / (24 * 60 * 60 * 1000)}일"
     }
 
-//    private fun sendDataThisFragToParentFrag(){
-//        val bundle = Bundle()
-//        bundle.putString("name", binding.tilName.editText?.text.toString())
-//        bundle.putString("selected_gender", spinnerResult)
-//        bundle.putString("birthday", binding.tvBirthday.text.toString() )
-//        childFragmentManager.setFragmentResult("AddBabyDialogResult", bundle)
-//    }
-
     override fun onClick(v: View?) {
         when (v?.id) {
             binding.btnBack.id -> {
@@ -238,13 +254,19 @@ class AddBabyDialog : DialogFragment(), View.OnClickListener {
             }
 
             binding.clayoutBtnRegister.id -> {
-//                sendDataThisFragToParentFrag()
-                model.sendData(
-                    binding.tilName.editText?.text.toString(),
-                    spinnerResult,
-                    binding.tvBirthday.text.toString()
-                )
-                dismiss()
+
+                if (isName && isGender && isBirthday) {
+                    val addBabyData = AddBabyData(
+                        binding.tilName.editText?.text.toString(),
+                        spinnerResult,
+                        binding.tvBirthday.text.toString(),
+                        binding.tvDday.text.toString()
+                    )
+                    model.setData(addBabyData)
+                    dismiss()
+                } else {
+                    requireActivity().displayToast("모든 정보를 입력해주세요")
+                }
             }
         }
     }

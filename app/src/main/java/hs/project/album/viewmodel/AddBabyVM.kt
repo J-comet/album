@@ -2,18 +2,23 @@ package hs.project.album.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-
+import hs.project.album.data.AddBabyData
 
 class AddBabyVM : ViewModel() {
 
-    val name = MutableLiveData<String>()
-    val gender = MutableLiveData<String>()
-    val birthday = MutableLiveData<String>()
+    var vmAddBabyData = MutableLiveData<AddBabyData?>()
+//    val vmBirthCount = MutableLiveData<String?>()
 
-    fun sendData(strName: String, strGender: String, strBirthDay: String) {
-        name.value = strName
-        gender.value = strGender
-        birthday.value = strBirthDay
+    fun setData(addBabyData: AddBabyData) {
+        vmAddBabyData.value = addBabyData
+    }
+
+//    fun setBirthCount(strCount: String){
+//        vmBirthCount.value = strCount
+//    }
+
+    fun clear(){
+        vmAddBabyData.value = null
     }
 
 }
