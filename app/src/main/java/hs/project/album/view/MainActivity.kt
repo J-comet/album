@@ -259,7 +259,26 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main)  
         when (requestCode) {
             REQUEST_CODE_PERMISSIONS -> {
                 if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
-                    openGallery()
+                    if (addPicture){
+                        openGallery()
+                    } else {
+
+                        val builder = AlertDialog.Builder(this)
+                            .setMessage(resString(R.string.str_common_13))
+                            .setCancelable(true)
+                            .setPositiveButton("이동") { dialogInterface: DialogInterface, i: Int ->
+                                CreateAlbumDialog().show(
+                                    supportFragmentManager,
+                                    "CreateAlbumDialog"
+                                )
+                            }
+                            .setNegativeButton("취소") { dialogInterface: DialogInterface, i: Int ->
+                                displayToast(resString(R.string.str_common_13))
+                            }.show()
+                        builder.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(ContextCompat.getColor(this, R.color.color_808080))
+                        builder.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(this, R.color.black))
+
+                    }
                 } else {
                     displayToast(resString(R.string.str_common_08))
                 }
