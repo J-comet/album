@@ -2,25 +2,24 @@ package hs.project.album.view
 
 
 import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
-import android.view.WindowManager
-import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.badge.BadgeDrawable
 import hs.project.album.BaseActivity
+import hs.project.album.Constant
 import hs.project.album.MyApplication
 import hs.project.album.R
 import hs.project.album.databinding.ActivityMainBinding
+import hs.project.album.dialog.CreateAlbumDialog
 import hs.project.album.util.displayToast
 import hs.project.album.util.resString
 import hs.project.album.view.add.AddImageDialog
@@ -28,8 +27,7 @@ import hs.project.album.view.album.AlbumFrag
 import hs.project.album.view.family.FamilyFrag
 import hs.project.album.view.setting.SettingFrag
 import hs.project.album.view.story.StoryFrag
-import hs.project.album.view.user.LoginActivity
-import hs.project.album.view.user.SignupActivity
+import hs.project.album.viewmodel.UserAlbumVM
 
 
 class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main)  {
@@ -37,6 +35,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main)  
     private lateinit var permissionResultLauncher: ActivityResultLauncher<Array<String>>
 //    private lateinit var cameraLauncher: ActivityResultLauncher<Uri>
     private lateinit var galleryLauncher: ActivityResultLauncher<Intent>
+    private lateinit var userAlbumVM: UserAlbumVM
+    private var albumList: MutableList<String> = ArrayList()
+    private var addPicture = false
 
     companion object {
         const val TAG: String = "MainActivity"
@@ -57,6 +58,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main)  
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         init()
+        getUserAlbumList()
+
         supportFragmentManager.beginTransaction()
             .replace(R.id.frlayout_main, AlbumFrag.newInstance())
             .commit()
@@ -159,9 +162,50 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main)  
             if (!checkPermission(PERMISSIONS_REQUESTED)) {
                 permissionResultLauncher.launch(PERMISSIONS_REQUESTED)
             } else {
-                openGallery()
+
+                if (addPicture){
+                    openGallery()
+                } else {
+
+                    val builder = AlertDialog.Builder(this)
+                        .setMessage(resString(R.string.str_common_13))
+                        .setCancelable(true)
+                        .setPositiveButton("이동") { dialogInterface: DialogInterface, i: Int ->
+                            CreateAlbumDialog().show(
+                                supportFragmentManager,
+                                "CreateAlbumDialog"
+                            )
+                        }
+                        .setNegativeButton("취소") { dialogInterface: DialogInterface, i: Int ->
+                            displayToast(resString(R.string.str_common_13))
+                        }.show()
+                    builder.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(ContextCompat.getColor(this, R.color.color_808080))
+                    builder.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(this, R.color.black))
+
+                }
             }
         }
+    }
+
+    private fun getUserAlbumList() {
+        // user 데이터의 album Idx List 가져옴
+        MyApplication.fireStoreDB.collection(Constant.FIREBASE_DOC.USER_LIST)
+            .document(MyApplication.firebaseAuth.currentUser?.email.toString())
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    albumList = document["album_list"] as ArrayList<String>
+
+                    addPicture = false
+
+                    if (albumList.size > 0) {
+                        addPicture = true
+                    }
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("hs", "get failed with ", exception)
+            }
     }
 
 //    private fun openPictureDialog() {

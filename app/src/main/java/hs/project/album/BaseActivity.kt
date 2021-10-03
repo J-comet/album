@@ -16,6 +16,7 @@ import androidx.databinding.ViewDataBinding
 import com.google.android.material.snackbar.BaseTransientBottomBar.ANIMATION_MODE_SLIDE
 import com.google.android.material.snackbar.Snackbar
 import hs.project.album.util.resString
+import java.time.Duration
 
 
 abstract class BaseActivity<T : ViewDataBinding>(@LayoutRes private val layoutResId: Int) :
@@ -44,8 +45,8 @@ abstract class BaseActivity<T : ViewDataBinding>(@LayoutRes private val layoutRe
     }
 
     // 로그인할때 인증실패시 띄워주도록 할 것
-    fun showSnackBar(v: View,strId: Int){
-        val slideSnackBar = Snackbar.make(v, resString(strId), 2000)
+    fun showSnackBar(v: View, strId: Int, duration: Int) {
+        val slideSnackBar = Snackbar.make(v, resString(strId), duration)
         slideSnackBar.animationMode = ANIMATION_MODE_SLIDE
         slideSnackBar.show()
     }

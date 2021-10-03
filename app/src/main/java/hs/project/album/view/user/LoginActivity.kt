@@ -179,7 +179,7 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>(R.layout.activity_login
                             Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                         startActivity(i)
                     } else {
-                        showSnackBar(binding.btnLogin.rootView,R.string.str_verify_email)
+                        showSnackBar(binding.btnLogin.rootView,R.string.str_verify_email,2000)
                     }
                 } else {
                     displayToast(resString(R.string.str_check_info))

@@ -9,7 +9,7 @@
         tools:context=".view.album.AlbumView02Frag">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/need_album"
+            android:id="@+id/none_album"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="gone">
@@ -87,7 +87,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/use_album"
+            android:id="@+id/use_album_Img"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="gone">

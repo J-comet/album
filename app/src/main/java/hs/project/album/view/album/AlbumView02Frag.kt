@@ -18,6 +18,9 @@ class AlbumView02Frag : BaseFragment<FragmentAlbumView02Binding>(R.layout.fragme
 
     private var albumList: MutableList<String> = ArrayList()
     private lateinit var userAlbumVM: UserAlbumVM
+    private var noneAlbum = false  // 앨범 없는 사용자
+    private var hasAlbumNoneImg = false // 앨범은 있고 이미지는 등록 전 사용자
+    private var hasImg = false // 앨범, 이미지 등록 사용자
 
     companion object {
         const val TAG = "AlbumViewPager02"
@@ -55,12 +58,101 @@ class AlbumView02Frag : BaseFragment<FragmentAlbumView02Binding>(R.layout.fragme
     }
 
     fun init() {
-        binding.needAlbum.setOnClickListener(this)
+        binding.noneAlbum.setOnClickListener(this)
+        getUserAlbumList()
+    }
+
+    private fun mainViewStatus(noneAlbum: Boolean, hasAlbumNoneImg: Boolean, hasImg: Boolean) {
+        when (true) {
+            noneAlbum -> {
+                if (activity != null && isAdded) {
+                    requireActivity().runOnUiThread {
+                        binding.root.post {
+                            binding.noneAlbum.visible()
+                            binding.noneImage.hide(1)
+                            binding.useAlbumImg.hide(1)
+                        }
+                    }
+                }
+            }
+            hasAlbumNoneImg -> {
+                if (activity != null && isAdded) {
+                    requireActivity().runOnUiThread {
+                        binding.root.post {
+                            binding.noneAlbum.hide(1)
+                            binding.noneImage.visible()
+                            binding.useAlbumImg.hide(1)
+                        }
+                    }
+                }
+            }
+            hasImg -> {
+                if (activity != null && isAdded) {
+                    requireActivity().runOnUiThread {
+                        binding.root.post {
+                            binding.noneAlbum.hide(1)
+                            binding.noneImage.hide(1)
+                            binding.useAlbumImg.visible()
+                        }
+                    }
+                }
+            }
+            else -> {
+                if (activity != null && isAdded) {
+                    requireActivity().runOnUiThread {
+                        binding.root.post {
+                            binding.noneAlbum.visible()
+                            binding.noneImage.hide(1)
+                            binding.useAlbumImg.hide(1)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun getUserAlbumList() {
+        // user 데이터의 album Idx List 가져옴
+        MyApplication.fireStoreDB.collection(Constant.FIREBASE_DOC.USER_LIST)
+            .document(MyApplication.firebaseAuth.currentUser?.email.toString())
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    noneAlbum = false
+                    hasAlbumNoneImg = false
+                    hasImg = false
+
+                    albumList = document["album_list"] as ArrayList<String>
+
+                    if (albumList.size > 0 || albumList.isNotEmpty()) {
+                        hasAlbumNoneImg = true
+
+                        /**
+                         * 앨범,이미지 전부 있을 때 비교할 값 설정 필요
+                         */
+                        /*if (){
+
+                        }*/
+
+                    } else {
+                        noneAlbum = true
+                    }
+
+                    mainViewStatus(noneAlbum, hasAlbumNoneImg, hasImg)
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("hs", "get failed with ", exception)
+            }
     }
 
     private fun checkMyAlbum(albumList: MutableList<String>) {
 
         var imageList: MutableList<String> = ArrayList()
+
+        noneAlbum = false
+        hasAlbumNoneImg = false
+        hasImg = false
 
         // 가입되어 있는 앨범이 있는지 검사
         for (item in albumList) {
@@ -73,39 +165,15 @@ class AlbumView02Frag : BaseFragment<FragmentAlbumView02Binding>(R.layout.fragme
                         imageList = document["image_list"] as MutableList<String>
 
                         if (imageList.size > 1) {  // 이미지가 있을 때
-
-                            if(activity != null && isAdded){ // fragment 와 activity 가 연결되어있는지 체크
-                                requireActivity().runOnUiThread {
-                                    binding.root.post {
-                                        binding.needAlbum.hide(1)
-                                        binding.noneImage.hide(1)
-                                        binding.useAlbum.visible()
-                                    }
-                                }
-                            }
+                            hasImg = true
                         } else {  // 이미지가 없을 때
-                            if(activity != null && isAdded){
-                                requireActivity().runOnUiThread {
-                                    binding.root.post {
-                                        binding.needAlbum.hide(1)
-                                        binding.noneImage.visible()
-                                        binding.useAlbum.hide(1)
-                                    }
-                                }
-                            }
+                            hasAlbumNoneImg = true
                         }
 
                     } else {  // 앨범 존재하지 않음
-                        if(activity != null && isAdded){
-                            requireActivity().runOnUiThread {
-                                binding.root.post {
-                                    binding.needAlbum.visible()
-                                    binding.noneImage.hide(1)
-                                    binding.useAlbum.hide(1)
-                                }
-                            }
-                        }
+                        noneAlbum = true
                     }
+                    mainViewStatus(noneAlbum, hasAlbumNoneImg, hasImg)
                 }
                 .addOnFailureListener { exception ->
                     Log.d("hs", "get failed with ", exception)
@@ -117,7 +185,7 @@ class AlbumView02Frag : BaseFragment<FragmentAlbumView02Binding>(R.layout.fragme
 
     override fun onClick(v: View?) {
         when (v?.id) {
-            binding.needAlbum.id -> {
+            binding.noneAlbum.id -> {
                 CreateAlbumDialog().show(
                     childFragmentManager,
                     "CreateAlbumDialog"
