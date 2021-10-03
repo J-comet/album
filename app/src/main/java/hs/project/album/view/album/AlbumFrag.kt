@@ -2,33 +2,26 @@ package hs.project.album.view.album
 
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import hs.project.album.BaseActivity
-import hs.project.album.BaseFragment
-import hs.project.album.R
+import hs.project.album.*
 import hs.project.album.adapter.AlbumMonthAdapter
 import hs.project.album.data.AlbumMonth
-import hs.project.album.databinding.ActivityMainBinding
 import hs.project.album.databinding.FragmentAlbumBinding
-import hs.project.album.util.getCurMonth
-import hs.project.album.util.getCurYear
-import hs.project.album.util.hide
-import hs.project.album.util.visible
-import hs.project.album.view.MainActivity
-import java.text.SimpleDateFormat
+import hs.project.album.util.*
+import hs.project.album.viewmodel.UserAlbumVM
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class AlbumFrag : BaseFragment<FragmentAlbumBinding>(R.layout.fragment_album) {
 
     private val monthList: MutableList<AlbumMonth> = ArrayList()
     private var month: Int = 0
+    private lateinit var userAlbumVM: UserAlbumVM
+    private var albumList: MutableList<String> = ArrayList()
 
     companion object {
         const val TAG: String = "앨범 프래그먼트"
@@ -39,13 +32,16 @@ class AlbumFrag : BaseFragment<FragmentAlbumBinding>(R.layout.fragment_album) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        userAlbumVM = ViewModelProvider(requireActivity()).get(UserAlbumVM::class.java)
 
-        childFragmentManager.beginTransaction().replace(
-            R.id.flayout_album_container,
-            AlbumView02Frag.newInstance()
-        )
-            .addToBackStack(null)
-            .commit()
+        if (requireActivity().isNetworkConnected()) {
+            getUserAlbumList()
+        } else {
+            requireActivity().displayToast(requireActivity().resString(R.string.str_network_fail))
+        }
+
+        setView02Fragment()
+
         init()
         initRecyclerView()
     }
@@ -53,6 +49,33 @@ class AlbumFrag : BaseFragment<FragmentAlbumBinding>(R.layout.fragment_album) {
     private fun init() {
         binding.tvYear.text = getCurYear()
         month = getCurMonth().toInt()
+    }
+
+    fun setView02Fragment(){
+        childFragmentManager.beginTransaction().replace(
+            R.id.flayout_album_container,
+            AlbumView02Frag.newInstance()
+        )
+            .addToBackStack(null)
+            .commit()
+    }
+
+    private fun getUserAlbumList() {
+        // user 데이터의 album Idx List 가져옴
+        MyApplication.fireStoreDB.collection(Constant.FIREBASE_DOC.USER_LIST)
+            .document(MyApplication.firebaseAuth.currentUser?.email.toString())
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    albumList = document["album_list"] as ArrayList<String>
+                    for (i in albumList.indices) {
+                        userAlbumVM.add(albumList[i])
+                    }
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("hs", "get failed with ", exception)
+            }
     }
 
     private fun initRecyclerView() {

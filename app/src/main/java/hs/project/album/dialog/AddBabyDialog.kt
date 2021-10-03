@@ -24,6 +24,7 @@ import hs.project.album.R
 import hs.project.album.data.AddBabyData
 import hs.project.album.databinding.DialogAddBabyBinding
 import hs.project.album.util.displayToast
+import hs.project.album.util.getTodayDate
 import hs.project.album.util.resString
 import hs.project.album.viewmodel.AddBabyVM
 import java.text.SimpleDateFormat
@@ -234,14 +235,8 @@ class AddBabyDialog : DialogFragment(), View.OnClickListener {
         val strResultDate = year + month + day
 
         val startDate = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).parse(strResultDate).time
-        val today = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }.time.time
 
-        binding.tvDday.text = "태어난지 ${(today - startDate) / (24 * 60 * 60 * 1000)}일"
+        binding.tvDday.text = "태어난지 ${(getTodayDate() - startDate) / (24 * 60 * 60 * 1000)}일"
     }
 
     override fun onClick(v: View?) {

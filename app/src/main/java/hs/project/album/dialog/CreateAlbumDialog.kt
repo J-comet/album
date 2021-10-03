@@ -26,15 +26,19 @@ import hs.project.album.data.AddBabyData
 import hs.project.album.data.CreateAlbum
 import hs.project.album.databinding.DialogCreateAlbumBinding
 import hs.project.album.util.*
+import hs.project.album.view.album.AlbumFrag
 import hs.project.album.viewmodel.AddBabyVM
+import hs.project.album.viewmodel.UserAlbumVM
 
 
 class CreateAlbumDialog : DialogFragment(), View.OnClickListener {
 
     private lateinit var binding: DialogCreateAlbumBinding
     private var spinnerResult = ""
-    private lateinit var model: AddBabyVM
+    private lateinit var addBabyVM: AddBabyVM
+    private lateinit var userAlbumVM: UserAlbumVM
     private lateinit var babyList: MutableList<AddBabyData>
+    private var albumList: MutableList<String> = ArrayList()
     private var isName = false
     private var isRelation = false
 
@@ -55,9 +59,10 @@ class CreateAlbumDialog : DialogFragment(), View.OnClickListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        model = ViewModelProvider(requireActivity()).get(AddBabyVM::class.java)
+        addBabyVM = ViewModelProvider(requireActivity()).get(AddBabyVM::class.java)
+        userAlbumVM = ViewModelProvider(requireActivity()).get(UserAlbumVM::class.java)
 
-        model.vmAddBabyData.observe(viewLifecycleOwner, { addBabyData ->
+        addBabyVM.vmAddBabyData.observe(viewLifecycleOwner, { addBabyData ->
 //            val name = addBabyData?.name
 //            val gender = addBabyData?.gender
 //            val birthday = addBabyData?.birthday
@@ -169,6 +174,14 @@ class CreateAlbumDialog : DialogFragment(), View.OnClickListener {
 
         MyApplication.fireStoreDB.collection(Constant.FIREBASE_DOC.USER_LIST).document(MyApplication.firebaseAuth.currentUser?.email.toString())
             .set(data, SetOptions.merge())
+
+        /**
+         * 최초 사용자는 이부분에서 앨범,사진등록 여부를 확인
+         * userAlbumVM 에 데이터 추가
+         */
+        for (i in albumList.indices) {
+            userAlbumVM.add(albumList[i])
+        }
     }
 
     private fun createAlbum(){
@@ -209,6 +222,7 @@ class CreateAlbumDialog : DialogFragment(), View.OnClickListener {
                         requireActivity().displayToast("앨범 생성")
                         addAlbumIdx("album_$currentUserUID") // 유저데이터에 앨범 Idx 값 추가
                         dismiss()
+                        (parentFragment as? AlbumFrag)?.setView02Fragment()
                     }
                 }
                 .addOnSuccessListener { Log.d("hs", "DocumentSnapshot successfully written!") }
@@ -219,7 +233,7 @@ class CreateAlbumDialog : DialogFragment(), View.OnClickListener {
     override fun onClick(v: View?) {
         when (v?.id) {
             binding.btnBack.id -> {
-                model.clear()
+                addBabyVM.clear()
                 dismiss()
             }
             binding.btnAddBaby.id -> {
