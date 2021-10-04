@@ -162,27 +162,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main)  
             if (!checkPermission(PERMISSIONS_REQUESTED)) {
                 permissionResultLauncher.launch(PERMISSIONS_REQUESTED)
             } else {
-
-                if (addPicture){
-                    openGallery()
-                } else {
-
-                    val builder = AlertDialog.Builder(this)
-                        .setMessage(resString(R.string.str_common_13))
-                        .setCancelable(true)
-                        .setPositiveButton("이동") { dialogInterface: DialogInterface, i: Int ->
-                            CreateAlbumDialog().show(
-                                supportFragmentManager,
-                                "CreateAlbumDialog"
-                            )
-                        }
-                        .setNegativeButton("취소") { dialogInterface: DialogInterface, i: Int ->
-                            displayToast(resString(R.string.str_common_13))
-                        }.show()
-                    builder.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(ContextCompat.getColor(this, R.color.color_808080))
-                    builder.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(this, R.color.black))
-
-                }
+                openGallery()
             }
         }
     }
@@ -228,13 +208,28 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main)  
 //    }
 
     fun openGallery() {
-//        val intent = Intent()
-//        intent.type = "image/*"
-//        intent.action = Intent.ACTION_GET_CONTENT
-        val intent = Intent(Intent.ACTION_PICK)
-        intent.type = MediaStore.Images.Media.CONTENT_TYPE
-        intent.type = "image/*"
-        galleryLauncher.launch(intent)
+        if (addPicture){
+            val intent = Intent(Intent.ACTION_PICK)
+            intent.type = MediaStore.Images.Media.CONTENT_TYPE
+            intent.type = "image/*"
+            galleryLauncher.launch(intent)
+        } else {
+
+            val builder = AlertDialog.Builder(this)
+                .setMessage(resString(R.string.str_common_13))
+                .setCancelable(true)
+                .setPositiveButton("이동") { dialogInterface: DialogInterface, i: Int ->
+                    CreateAlbumDialog().show(
+                        supportFragmentManager,
+                        "CreateAlbumDialog"
+                    )
+                }
+                .setNegativeButton("취소") { dialogInterface: DialogInterface, i: Int ->
+                    displayToast(resString(R.string.str_common_13))
+                }.show()
+            builder.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(ContextCompat.getColor(this, R.color.color_808080))
+            builder.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(this, R.color.black))
+        }
     }
 
     /**
@@ -259,26 +254,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main)  
         when (requestCode) {
             REQUEST_CODE_PERMISSIONS -> {
                 if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
-                    if (addPicture){
-                        openGallery()
-                    } else {
-
-                        val builder = AlertDialog.Builder(this)
-                            .setMessage(resString(R.string.str_common_13))
-                            .setCancelable(true)
-                            .setPositiveButton("이동") { dialogInterface: DialogInterface, i: Int ->
-                                CreateAlbumDialog().show(
-                                    supportFragmentManager,
-                                    "CreateAlbumDialog"
-                                )
-                            }
-                            .setNegativeButton("취소") { dialogInterface: DialogInterface, i: Int ->
-                                displayToast(resString(R.string.str_common_13))
-                            }.show()
-                        builder.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(ContextCompat.getColor(this, R.color.color_808080))
-                        builder.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(this, R.color.black))
-
-                    }
+                    openGallery()
                 } else {
                     displayToast(resString(R.string.str_common_08))
                 }
