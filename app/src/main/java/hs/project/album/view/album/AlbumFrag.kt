@@ -10,6 +10,7 @@ import hs.project.album.*
 import hs.project.album.adapter.AlbumMonthAdapter
 import hs.project.album.data.AlbumMonth
 import hs.project.album.databinding.FragmentAlbumBinding
+import hs.project.album.dialog.CommonDialog
 import hs.project.album.util.*
 import hs.project.album.viewmodel.UserAlbumVM
 import java.util.*
@@ -34,11 +35,20 @@ class AlbumFrag : BaseFragment<FragmentAlbumBinding>(R.layout.fragment_album) {
         super.onViewCreated(view, savedInstanceState)
         userAlbumVM = ViewModelProvider(requireActivity()).get(UserAlbumVM::class.java)
 
-        if (requireActivity().isNetworkConnected()) {
-            getUserAlbumList()
-        } else {
-            requireActivity().displayToast(requireActivity().resString(R.string.str_network_fail))
+        if (activity != null && isAdded) {
+            if (requireActivity().isNetworkConnected()) {
+                getUserAlbumList()
+            } else {
+                val dialog = CommonDialog(requireActivity().resString(R.string.str_network_fail))
+                dialog.show(childFragmentManager, "CommonDialog")
+                dialog.setOnClickListener(object : CommonDialog.OnDialogClickListener {
+                    override fun onClicked() {
+                        dialog.dismiss()
+                    }
+                })
+            }
         }
+
 
         setView02Fragment()
 

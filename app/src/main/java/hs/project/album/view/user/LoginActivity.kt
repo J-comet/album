@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.viewpager2.widget.ViewPager2
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
@@ -17,6 +16,7 @@ import hs.project.album.MyApplication
 import hs.project.album.R
 import hs.project.album.adapter.SlideViewPagerAdapter
 import hs.project.album.databinding.ActivityLoginBinding
+import hs.project.album.dialog.CommonDialog
 import hs.project.album.util.*
 import hs.project.album.view.MainActivity
 
@@ -145,7 +145,13 @@ class LoginActivity : BaseActivity<ActivityLoginBinding>(R.layout.activity_login
                                 )
                             }, 600)
                         } else {
-                            displayToast(resString(R.string.str_network_fail))
+                            val dialog = CommonDialog(resString(R.string.str_network_fail))
+                            dialog.show(supportFragmentManager, "CommonDialog")
+                            dialog.setOnClickListener(object : CommonDialog.OnDialogClickListener {
+                                override fun onClicked() {
+                                    dialog.dismiss()
+                                }
+                            })
                         }
                     }
                 }

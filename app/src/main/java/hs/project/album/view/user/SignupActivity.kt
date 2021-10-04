@@ -14,6 +14,7 @@ import hs.project.album.Constant
 import hs.project.album.MyApplication
 import hs.project.album.R
 import hs.project.album.databinding.ActivitySignupBinding
+import hs.project.album.dialog.CommonDialog
 import hs.project.album.util.*
 
 
@@ -203,7 +204,13 @@ class SignupActivity : BaseActivity<ActivitySignupBinding>(R.layout.activity_sig
                         displayToast(resString(R.string.str_common_07))
                     }
                 } else {
-                    displayToast(resString(R.string.str_network_fail))
+                    val dialog = CommonDialog(resString(R.string.str_network_fail))
+                    dialog.show(supportFragmentManager, "CommonDialog")
+                    dialog.setOnClickListener(object : CommonDialog.OnDialogClickListener {
+                        override fun onClicked() {
+                            dialog.dismiss()
+                        }
+                    })
                 }
             }
         }

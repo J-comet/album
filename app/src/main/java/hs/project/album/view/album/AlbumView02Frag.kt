@@ -9,6 +9,7 @@ import hs.project.album.Constant
 import hs.project.album.MyApplication
 import hs.project.album.R
 import hs.project.album.databinding.FragmentAlbumView02Binding
+import hs.project.album.dialog.CommonDialog
 import hs.project.album.dialog.CreateAlbumDialog
 import hs.project.album.util.*
 import hs.project.album.viewmodel.UserAlbumVM
@@ -53,7 +54,13 @@ class AlbumView02Frag : BaseFragment<FragmentAlbumView02Binding>(R.layout.fragme
                 if (requireActivity().isNetworkConnected()) {
                     list?.let { it -> checkMyAlbum(it) }
                 } else {
-                    requireActivity().displayToast(requireActivity().resString(R.string.str_network_fail))
+                    val dialog = CommonDialog(requireActivity().resString(R.string.str_network_fail))
+                    dialog.show(childFragmentManager, "CommonDialog")
+                    dialog.setOnClickListener(object : CommonDialog.OnDialogClickListener {
+                        override fun onClicked() {
+                            dialog.dismiss()
+                        }
+                    })
                 }
             }
         })

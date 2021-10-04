@@ -240,17 +240,26 @@ class CreateAlbumDialog : DialogFragment(), View.OnClickListener {
                 AddBabyDialog().show(childFragmentManager, "AddBabyDialog")
             }
             binding.clayoutBtnRegister.id -> {
-                if (isName && isRelation && babyList.isNotEmpty()){
 
-                    if (requireActivity().isNetworkConnected()){
-                        binding.loadingView.visible()
-                        createAlbum()
+                if (activity != null && isAdded) {
+                    if (isName && isRelation && babyList.isNotEmpty()){
+
+                        if (requireActivity().isNetworkConnected()){
+                            binding.loadingView.visible()
+                            createAlbum()
+                        } else {
+                            val dialog = CommonDialog(requireActivity().resString(R.string.str_network_fail))
+                            dialog.show(childFragmentManager, "CommonDialog")
+                            dialog.setOnClickListener(object : CommonDialog.OnDialogClickListener {
+                                override fun onClicked() {
+                                    dialog.dismiss()
+                                }
+                            })
+                        }
+
                     } else {
-                        requireActivity().displayToast(requireActivity().resString(R.string.str_network_fail))
+                        requireActivity().displayToast(requireActivity().resString(R.string.str_please_info))
                     }
-
-                } else {
-                    requireActivity().displayToast(requireActivity().resString(R.string.str_please_info))
                 }
             }
         }

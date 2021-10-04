@@ -251,18 +251,21 @@ class AddBabyDialog : DialogFragment(), View.OnClickListener {
 
             binding.clayoutBtnRegister.id -> {
 
-                if (isName && isGender && isBirthday) {
-                    val addBabyData = AddBabyData(
-                        binding.tilName.editText?.text.toString(),
-                        spinnerResult,
-                        binding.tvBirthday.text.toString(),
-                        binding.tvDday.text.toString()
-                    )
-                    model.setData(addBabyData)
-                    dismiss()
-                } else {
-                    requireActivity().displayToast(requireActivity().resString(R.string.str_please_info))
+                if (activity != null && isAdded) {
+                    if (isName && isGender && isBirthday) {
+                        val addBabyData = AddBabyData(
+                            binding.tilName.editText?.text.toString(),
+                            spinnerResult,
+                            binding.tvBirthday.text.toString(),
+                            binding.tvDday.text.toString()
+                        )
+                        model.setData(addBabyData)
+                        dismiss()
+                    } else {
+                        requireActivity().displayToast(requireActivity().resString(R.string.str_please_info))
+                    }
                 }
+
             }
         }
     }

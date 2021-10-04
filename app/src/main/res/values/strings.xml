@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Together Album</string>
 
-    <string name="str_network_fail">네트워크 연결이 끊겼습니다</string>
+    <string name="str_network_fail">네트워크 상태가 불안정합니다</string>
 
     <string name="str_common_01">회원가입</string>
     <string name="str_common_02">로그인</string>
