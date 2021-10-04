@@ -13,6 +13,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.badge.BadgeDrawable
 import hs.project.album.BaseActivity
 import hs.project.album.Constant
@@ -21,6 +22,7 @@ import hs.project.album.R
 import hs.project.album.databinding.ActivityMainBinding
 import hs.project.album.dialog.CreateAlbumDialog
 import hs.project.album.util.displayToast
+import hs.project.album.util.isNetworkConnected
 import hs.project.album.util.resString
 import hs.project.album.view.add.AddImageDialog
 import hs.project.album.view.album.AlbumFrag
@@ -30,10 +32,11 @@ import hs.project.album.view.story.StoryFrag
 import hs.project.album.viewmodel.UserAlbumVM
 
 
-class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main)  {
+class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
 
     private lateinit var permissionResultLauncher: ActivityResultLauncher<Array<String>>
-//    private lateinit var cameraLauncher: ActivityResultLauncher<Uri>
+
+    //    private lateinit var cameraLauncher: ActivityResultLauncher<Uri>
     private lateinit var galleryLauncher: ActivityResultLauncher<Intent>
     private lateinit var userAlbumVM: UserAlbumVM
     private var albumList: MutableList<String> = ArrayList()
@@ -57,6 +60,18 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main)  
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        userAlbumVM = ViewModelProvider(this).get(UserAlbumVM::class.java)
+        userAlbumVM.vmAlbumList.observe(this, { list ->
+
+            addPicture = false
+
+            if (list != null) {
+                if (list.size > 0) {
+                    addPicture = true
+                }
+            }
+
+        })
         init()
         getUserAlbumList()
 
@@ -74,6 +89,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main)  
                     displayToast(resString(R.string.str_common_08))
                 }
             }
+
 
         // camera open
 //        cameraLauncher =
@@ -102,7 +118,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main)  
                 }
             }
     }
-
 
 
     private fun init() {
@@ -208,7 +223,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main)  
 //    }
 
     fun openGallery() {
-        if (addPicture){
+        if (addPicture) {
             val intent = Intent(Intent.ACTION_PICK)
             intent.type = MediaStore.Images.Media.CONTENT_TYPE
             intent.type = "image/*"
@@ -227,8 +242,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main)  
                 .setNegativeButton("취소") { dialogInterface: DialogInterface, i: Int ->
                     displayToast(resString(R.string.str_common_13))
                 }.show()
-            builder.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(ContextCompat.getColor(this, R.color.color_808080))
-            builder.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(this, R.color.black))
+            builder.getButton(AlertDialog.BUTTON_NEGATIVE)
+                .setTextColor(ContextCompat.getColor(this, R.color.color_808080))
+            builder.getButton(AlertDialog.BUTTON_POSITIVE)
+                .setTextColor(ContextCompat.getColor(this, R.color.black))
         }
     }
 
@@ -277,7 +294,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main)  
 //        }
 //
 //    }
-
 
 }
 
