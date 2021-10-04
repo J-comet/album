@@ -49,10 +49,12 @@ class AlbumView02Frag : BaseFragment<FragmentAlbumView02Binding>(R.layout.fragme
 
             (parentFragment as? AlbumFrag)?.visibleLoading()
 
-            if (requireActivity().isNetworkConnected()) {
-                list?.let { it -> checkMyAlbum(it) }
-            } else {
-                requireActivity().displayToast(requireActivity().resString(R.string.str_network_fail))
+            if (activity != null && isAdded) {
+                if (requireActivity().isNetworkConnected()) {
+                    list?.let { it -> checkMyAlbum(it) }
+                } else {
+                    requireActivity().displayToast(requireActivity().resString(R.string.str_network_fail))
+                }
             }
         })
     }
