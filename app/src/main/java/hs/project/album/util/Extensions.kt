@@ -49,6 +49,11 @@ fun getTodayDate(): Long {
     }.time.time
 }
 
+fun getCurrentDateTime(): String {
+    val curDateTimeFormat = SimpleDateFormat("yyyyMMddHHmmss",Locale.getDefault())
+    return curDateTimeFormat.format(Calendar.getInstance().time)
+}
+
 fun Context.isNetworkConnected(): Boolean {
     var result = false
     val cm = getSystemService(AppCompatActivity.CONNECTIVITY_SERVICE) as ConnectivityManager

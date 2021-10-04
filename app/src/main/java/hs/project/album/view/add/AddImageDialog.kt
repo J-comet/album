@@ -3,16 +3,30 @@ package hs.project.album.view.add
 
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.SetOptions
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageMetadata
+import hs.project.album.Constant
+import hs.project.album.MyApplication
 import hs.project.album.R
+import hs.project.album.data.AddPhotoData
 import hs.project.album.databinding.DialogAddImageBinding
+import hs.project.album.util.displayToast
+import hs.project.album.util.getCurrentDateTime
+import hs.project.album.util.hide
+import hs.project.album.util.visible
 import hs.project.album.view.MainActivity
+import java.io.IOException
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class AddImageDialog(selectedImgUri: Uri) : DialogFragment(), View.OnClickListener {
@@ -20,6 +34,7 @@ class AddImageDialog(selectedImgUri: Uri) : DialogFragment(), View.OnClickListen
     private lateinit var binding: DialogAddImageBinding
     private var saveType = "none"
     private val selectedUri = selectedImgUri
+    private var imgList = arrayListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,7 +56,7 @@ class AddImageDialog(selectedImgUri: Uri) : DialogFragment(), View.OnClickListen
         init()
     }
 
-    private fun init(){
+    private fun init() {
         binding.btnAll.setOnClickListener(this)
         binding.btnLimit.setOnClickListener(this)
         binding.ivImage.setOnClickListener(this)
@@ -59,7 +74,6 @@ class AddImageDialog(selectedImgUri: Uri) : DialogFragment(), View.OnClickListen
             .transform(RoundedCorners(12))
             .into(binding.ivImage)
 
-
         /**
          * 비율 맞춰서 출력하는 법 찾기
          */
@@ -76,9 +90,118 @@ class AddImageDialog(selectedImgUri: Uri) : DialogFragment(), View.OnClickListen
         binding.tvLimit.isSelected = selectedLimit
     }
 
+
+    /**
+     * FirebaseStorage
+     * Local File Upload
+     */
+    private fun uploadPhoto(uri: Uri, successHandler: (String) -> Unit, errorHandler: () -> Unit) {
+
+        binding.loadingView.visible()
+
+        val albumUid = MyApplication.prefs.getString(Constant.PREFERENCE_KEY.USE_ALBUM_ID, "none")
+
+        val fileName = "${getCurrentDateTime()}_${UUID.randomUUID()}.png"
+
+        MyApplication.storage.reference.child("${albumUid}/photo")
+            .child(fileName)
+            .putFile(uri)
+            .addOnCompleteListener { uploadTask ->
+                if (uploadTask.isSuccessful) {
+                    MyApplication.storage.reference
+                        .child("${albumUid}/photo")
+                        .child(fileName)
+                        .downloadUrl
+                        .addOnSuccessListener { uri ->
+                            successHandler(uri.toString())
+                        }.addOnFailureListener {
+                            errorHandler()
+                        }
+                } else {
+                    Log.e("AddImageDialog", uploadTask.exception.toString())
+                    errorHandler()
+                }
+
+//                binding.loadingView.hide(1)
+            }
+
+    }
+
+    /**
+     * FirebaseStorage
+     * Stream Upload , MetaData
+     */
+    private fun streamUpload() {
+        try {
+            val contentResolver = requireActivity().contentResolver
+            val storageMetadata = StorageMetadata.Builder()
+                .setContentType(contentResolver.getType(selectedUri))
+                .build()
+            FirebaseStorage.getInstance().reference
+                .child("posts")
+                .child(FirebaseAuth.getInstance().currentUser!!.uid)
+                .child(UUID.randomUUID().toString())
+                .putStream(contentResolver.openInputStream(selectedUri)!!, storageMetadata)
+                .addOnSuccessListener(requireActivity()) { task ->
+                    val downloadUrl: Uri? = task.uploadSessionUri
+                    requireActivity().displayToast("성공 성공 $downloadUrl")
+                }
+                .addOnFailureListener(
+                    requireActivity()
+                ) {
+                    requireActivity().displayToast("실패 실패")
+                }
+        } catch (e: IOException) {
+            Log.e("AddImageDialog", e.toString())
+        }
+
+        binding.loadingView.hide(1)
+    }
+
+    /**
+     * 1. 저장된 image_list 가져오기
+     * 2. list 에 새로운 이미지 추가
+     * 3. 다시 fireStore 에 저장
+     * album_list 에서 image_list 를 가져 온 후 list.add 추가 필요
+     */
+    private fun getAlbumImgList(fileName: String) {
+
+        MyApplication.fireStoreDB.collection(Constant.FIREBASE_DOC.ALBUM_LIST)
+            .document(MyApplication.prefs.getString(Constant.PREFERENCE_KEY.USE_ALBUM_ID, "none"))
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    imgList = document["image_list"] as ArrayList<String>
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("AddImageDialog", "get failed with ", exception)
+            }
+
+        imgList.add(fileName)
+
+        imgUpload(imgList)
+    }
+
+    private fun imgUpload(imgList: ArrayList<String>){
+        val data = hashMapOf("image_list" to imgList)
+
+        MyApplication.fireStoreDB.collection(Constant.FIREBASE_DOC.ALBUM_LIST)
+            .document(MyApplication.prefs.getString(Constant.PREFERENCE_KEY.USE_ALBUM_ID, "none"))
+            .set(data, SetOptions.merge())
+            .addOnSuccessListener {
+                dismiss()
+            }
+            .addOnFailureListener { exception ->
+                Log.e("AddImageDialog", "get failed with ", exception)
+            }
+
+        binding.loadingView.hide(1)
+    }
+
     override fun onClick(v: View?) {
 
-        when(v?.id){
+        when (v?.id) {
             binding.btnAll.id -> {
                 selectedStatus(selectedAll = true, selectedLimit = false)
                 saveType = binding.tvAll.text.toString()
@@ -93,9 +216,42 @@ class AddImageDialog(selectedImgUri: Uri) : DialogFragment(), View.OnClickListen
             }
             binding.clayoutBtnRegister.id -> {
                 /**
-                 * 서버에 저장해야될 데이터
-                 * 'saveType' , image , userIdx , image , date
+                 *  FireStore 에 저장해야 될 데이터
+                 *  'userUid', 'albumUid' , 'image' , 'saveType' , 'date'
                  */
+
+//                streamUpload()
+                val photoUri = selectedUri
+                uploadPhoto(photoUri,
+                    successHandler = { url -> // 다운로드 url 을 받아서 처리
+
+                        /**
+                         *  'album_uid' preference 에 저장한 값 불러오기
+                         *  preference 값이 없을 때는 앨범생성 때 값 설정
+                         *  값이 있다면 설정에서 유저가 변경할 때 값 설정
+                         */
+
+                        // RecyclerView 에 들어갈 데이터
+                        AddPhotoData(
+                            user_uid = MyApplication.firebaseAuth.currentUser?.uid,
+                            album_uid = MyApplication.prefs.getString(
+                                Constant.PREFERENCE_KEY.USE_ALBUM_ID,
+                                "none"
+                            ),
+                            url = url,
+                            save_type = saveType,
+                            date = getCurrentDateTime()
+                        )
+
+                        // fireStore 'album_list' 문서의 'image_list' 에 'url' 저장
+                        getAlbumImgList(url)
+
+                    },
+                    errorHandler = {
+                        if (activity != null && isAdded) {
+                            requireActivity().displayToast("사진 업로드 실패")
+                        }
+                    })
             }
 
         }

@@ -127,7 +127,7 @@ class CreateAlbumDialog : DialogFragment(), View.OnClickListener {
         )
 
         binding.rvBabyRegister.apply {
-            adapter = AddBabyAdapter(requireActivity(),addList)
+            adapter = AddBabyAdapter(requireActivity(), addList)
             layoutManager = manager
             addItemDecoration(
                 DividerItemDecoration(
@@ -166,14 +166,21 @@ class CreateAlbumDialog : DialogFragment(), View.OnClickListener {
     }
 
     // 유저데이터에 album_idx 값 추가
-    private fun addAlbumIdx(albumIdx: String){
+    private fun addAlbumIdx(albumIdx: String) {
         val albumList: MutableList<String> = ArrayList()
         albumList.add(albumIdx)
 
         val data = hashMapOf("album_list" to albumList)
 
-        MyApplication.fireStoreDB.collection(Constant.FIREBASE_DOC.USER_LIST).document(MyApplication.firebaseAuth.currentUser?.email.toString())
+        MyApplication.fireStoreDB.collection(Constant.FIREBASE_DOC.USER_LIST)
+            .document(MyApplication.firebaseAuth.currentUser?.email.toString())
             .set(data, SetOptions.merge())
+            .addOnSuccessListener { document ->
+                Log.e("CreateAlbumDialog", document.toString())
+            }
+            .addOnFailureListener { exception ->
+                Log.e("CreateAlbumDialog", "get failed with ", exception)
+            }
 
         /**
          * 최초 사용자는 이부분에서 앨범,사진등록 여부를 확인
@@ -184,7 +191,7 @@ class CreateAlbumDialog : DialogFragment(), View.OnClickListener {
         }
     }
 
-    private fun createAlbum(){
+    private fun createAlbum() {
         val createAlbum = CreateAlbum()
         val currentUserUID = MyApplication.firebaseAuth.currentUser?.uid.toString()
         val masterUidList: MutableList<String> = ArrayList()
@@ -220,8 +227,20 @@ class CreateAlbumDialog : DialogFragment(), View.OnClickListener {
                     if (it.isSuccessful) {
                         binding.loadingView.hide(1)
                         requireActivity().displayToast("앨범 생성")
+
+                        /**
+                         * 현재 유저가 사용중인 앨범 ID
+                         */
+                        if (MyApplication.prefs.getString(Constant.PREFERENCE_KEY.USE_ALBUM_ID, "none") == "none") {
+                            MyApplication.prefs.setString(
+                                Constant.PREFERENCE_KEY.USE_ALBUM_ID,
+                                "album_$currentUserUID"
+                            )
+                        }
+
                         addAlbumIdx("album_$currentUserUID") // 유저데이터에 앨범 Idx 값 추가
                         dismiss()
+
                         (parentFragment as? AlbumFrag)?.setView02Fragment()
                     }
                 }
@@ -242,13 +261,14 @@ class CreateAlbumDialog : DialogFragment(), View.OnClickListener {
             binding.clayoutBtnRegister.id -> {
 
                 if (activity != null && isAdded) {
-                    if (isName && isRelation && babyList.isNotEmpty()){
+                    if (isName && isRelation && babyList.isNotEmpty()) {
 
-                        if (requireActivity().isNetworkConnected()){
+                        if (requireActivity().isNetworkConnected()) {
                             binding.loadingView.visible()
                             createAlbum()
                         } else {
-                            val dialog = CommonDialog(requireActivity().resString(R.string.str_network_fail))
+                            val dialog =
+                                CommonDialog(requireActivity().resString(R.string.str_network_fail))
                             dialog.show(childFragmentManager, "CommonDialog")
                             dialog.setOnClickListener(object : CommonDialog.OnDialogClickListener {
                                 override fun onClicked() {
