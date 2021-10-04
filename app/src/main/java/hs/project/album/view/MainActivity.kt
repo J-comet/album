@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
@@ -15,6 +16,8 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.badge.BadgeDrawable
+import com.lyrebirdstudio.croppylib.Croppy
+import com.lyrebirdstudio.croppylib.main.CropRequest
 import hs.project.album.BaseActivity
 import hs.project.album.Constant
 import hs.project.album.MyApplication
@@ -22,7 +25,6 @@ import hs.project.album.R
 import hs.project.album.databinding.ActivityMainBinding
 import hs.project.album.dialog.CreateAlbumDialog
 import hs.project.album.util.displayToast
-import hs.project.album.util.isNetworkConnected
 import hs.project.album.util.resString
 import hs.project.album.view.add.AddImageDialog
 import hs.project.album.view.album.AlbumFrag
@@ -37,15 +39,20 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
     private lateinit var permissionResultLauncher: ActivityResultLauncher<Array<String>>
 
     //    private lateinit var cameraLauncher: ActivityResultLauncher<Uri>
+
+    private lateinit var cropImgLauncher: ActivityResultLauncher<String>
     private lateinit var galleryLauncher: ActivityResultLauncher<Intent>
+
     private lateinit var userAlbumVM: UserAlbumVM
     private var albumList: MutableList<String> = ArrayList()
     private var addPicture = false
+
 
     companion object {
         const val TAG: String = "MainActivity"
         const val REQUEST_CODE_PERMISSIONS = 1001
         const val REQUEST_GALLERY_PERMISSIONS = 1002
+        const val REQUEST_CODE_CROP_IMAGE = 1003
 
         private const val PERMISSION_READ_EXTERNAL_STORAGE =
             android.Manifest.permission.READ_EXTERNAL_STORAGE
@@ -102,21 +109,38 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
 //                }
 //            }
 
+        // 잘린이미지 결과 값 (현재 deprecated 된 걸로 사용 중)
+//        cropImgLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+//            uri.let {
+//                AddImageDialog(it).show(
+//                    supportFragmentManager,
+//                    "AddImageDialog"
+//                )
+//            }
+//        }
+
         galleryLauncher =
             registerForActivityResult(StartActivityForResult()) { result: ActivityResult ->
                 if (result.resultCode == RESULT_OK && result.data != null) {
                     val currentImageUri = result.data?.data
+
                     currentImageUri?.let {
-                        AddImageDialog(it).show(
-                            supportFragmentManager,
-                            "AddImageDialog"
+                        val cropRequest = CropRequest.Auto(
+                            sourceUri = it,
+                            requestCode = REQUEST_CODE_CROP_IMAGE
                         )
+
+                        Croppy.start(this, cropRequest)
+
                     }
                     Log.d("이미지", "$currentImageUri")
                 } else if (result.resultCode == RESULT_CANCELED) {
                     displayToast(resString(R.string.str_cancel_selected))
                 }
             }
+
+
+
     }
 
 
@@ -274,6 +298,24 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
                     openGallery()
                 } else {
                     displayToast(resString(R.string.str_common_08))
+                }
+            }
+        }
+    }
+
+    /**
+     * Croopy 이미지 결과처리
+     * 앱 완성 후 deprecated 다시 처리하기
+     */
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_CROP_IMAGE) {
+            if (data != null) {
+                data.data?.let {
+                    AddImageDialog(it).show(
+                        supportFragmentManager,
+                        "AddImageDialog"
+                    )
                 }
             }
         }

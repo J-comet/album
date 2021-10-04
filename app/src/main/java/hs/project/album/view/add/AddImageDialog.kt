@@ -56,8 +56,7 @@ class AddImageDialog(selectedImgUri: Uri) : DialogFragment(), View.OnClickListen
 
         Glide.with(this)
             .load(selectedUri)
-            .override(850,850)
-            .transform(CenterCrop(),RoundedCorners(9))
+            .transform(RoundedCorners(12))
             .into(binding.ivImage)
 
 
