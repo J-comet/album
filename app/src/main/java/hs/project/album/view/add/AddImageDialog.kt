@@ -34,7 +34,7 @@ class AddImageDialog(selectedImgUri: Uri) : DialogFragment(), View.OnClickListen
     private lateinit var binding: DialogAddImageBinding
     private var saveType = "none"
     private val selectedUri = selectedImgUri
-    private var imgList = arrayListOf<String>()
+    private var imgList = arrayListOf<AddPhotoData>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -164,26 +164,25 @@ class AddImageDialog(selectedImgUri: Uri) : DialogFragment(), View.OnClickListen
      * 3. 다시 fireStore 에 저장
      * album_list 에서 image_list 를 가져 온 후 list.add 추가 필요
      */
-    private fun getAlbumImgList(fileName: String) {
+    private fun getAlbumImgList(imgFile: AddPhotoData) {
 
         MyApplication.fireStoreDB.collection(Constant.FIREBASE_DOC.ALBUM_LIST)
             .document(MyApplication.prefs.getString(Constant.PREFERENCE_KEY.USE_ALBUM_ID, "none"))
             .get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
-                    imgList = document["image_list"] as ArrayList<String>
+                    imgList = document["image_list"] as ArrayList<AddPhotoData>
+                    imgList.add(imgFile)
+                    imgUpload(imgList)
                 }
             }
             .addOnFailureListener { exception ->
                 Log.e("AddImageDialog", "get failed with ", exception)
             }
 
-        imgList.add(fileName)
-
-        imgUpload(imgList)
     }
 
-    private fun imgUpload(imgList: ArrayList<String>){
+    private fun imgUpload(imgList: ArrayList<AddPhotoData>){
         val data = hashMapOf("image_list" to imgList)
 
         MyApplication.fireStoreDB.collection(Constant.FIREBASE_DOC.ALBUM_LIST)
@@ -234,17 +233,27 @@ class AddImageDialog(selectedImgUri: Uri) : DialogFragment(), View.OnClickListen
                         // RecyclerView 에 들어갈 데이터
                         AddPhotoData(
                             user_uid = MyApplication.firebaseAuth.currentUser?.uid,
-                            album_uid = MyApplication.prefs.getString(
-                                Constant.PREFERENCE_KEY.USE_ALBUM_ID,
-                                "none"
-                            ),
+//                            album_uid = MyApplication.prefs.getString(
+//                                Constant.PREFERENCE_KEY.USE_ALBUM_ID,
+//                                "none"
+//                            ),
                             url = url,
                             save_type = saveType,
                             date = getCurrentDateTime()
                         )
 
-                        // fireStore 'album_list' 문서의 'image_list' 에 'url' 저장
-                        getAlbumImgList(url)
+                        // fireStore 'album_list' 문서의 'image_list' 에 'AddPhotoData' 저장
+                        getAlbumImgList(
+                            AddPhotoData(
+                            user_uid = MyApplication.firebaseAuth.currentUser?.uid,
+//                            album_uid = MyApplication.prefs.getString(
+//                                Constant.PREFERENCE_KEY.USE_ALBUM_ID,
+//                                "none"
+//                            ),
+                            url = url,
+                            save_type = saveType,
+                            date = getCurrentDateTime()
+                        ))
 
                     },
                     errorHandler = {

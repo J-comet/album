@@ -23,6 +23,7 @@ import hs.project.album.MyApplication
 import hs.project.album.R
 import hs.project.album.adapter.AddBabyAdapter
 import hs.project.album.data.AddBabyData
+import hs.project.album.data.AddPhotoData
 import hs.project.album.data.CreateAlbum
 import hs.project.album.databinding.DialogCreateAlbumBinding
 import hs.project.album.util.*
@@ -175,9 +176,6 @@ class CreateAlbumDialog : DialogFragment(), View.OnClickListener {
         MyApplication.fireStoreDB.collection(Constant.FIREBASE_DOC.USER_LIST)
             .document(MyApplication.firebaseAuth.currentUser?.email.toString())
             .set(data, SetOptions.merge())
-            .addOnSuccessListener { document ->
-                Log.e("CreateAlbumDialog", document.toString())
-            }
             .addOnFailureListener { exception ->
                 Log.e("CreateAlbumDialog", "get failed with ", exception)
             }
@@ -194,9 +192,9 @@ class CreateAlbumDialog : DialogFragment(), View.OnClickListener {
     private fun createAlbum() {
         val createAlbum = CreateAlbum()
         val currentUserUID = MyApplication.firebaseAuth.currentUser?.uid.toString()
-        val masterUidList: MutableList<String> = ArrayList()
-        val imageList: MutableList<String> = ArrayList()
-        val joinUserUidList: MutableList<String> = ArrayList()
+        val masterUidList: ArrayList<String> = ArrayList()
+        val imageList: ArrayList<AddPhotoData> = ArrayList()
+        val joinUserUidList: ArrayList<String> = ArrayList()
 
         masterUidList.add(currentUserUID)
         joinUserUidList.add(currentUserUID)
