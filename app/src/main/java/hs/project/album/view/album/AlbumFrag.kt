@@ -23,8 +23,6 @@ class AlbumFrag : BaseFragment<FragmentAlbumBinding>(R.layout.fragment_album) {
     private val monthList: MutableList<AlbumMonth> = ArrayList()
     private var month: Int = 0
     private lateinit var userAlbumVM: UserAlbumVM
-    private var albumList: ArrayList<String> = ArrayList()
-    private var imgList: ArrayList<AddPhotoData> = ArrayList()
 
     companion object {
         const val TAG: String = "앨범 프래그먼트"
@@ -38,10 +36,7 @@ class AlbumFrag : BaseFragment<FragmentAlbumBinding>(R.layout.fragment_album) {
         userAlbumVM = ViewModelProvider(requireActivity()).get(UserAlbumVM::class.java)
 
         if (activity != null && isAdded) {
-            if (requireActivity().isNetworkConnected()) {
-                getUserAlbumList()
-                getAlbumImgList()
-            } else {
+            if (!requireActivity().isNetworkConnected()) {
                 val dialog = CommonDialog(requireActivity().resString(R.string.str_network_fail))
                 dialog.show(childFragmentManager, "CommonDialog")
                 dialog.setOnClickListener(object : CommonDialog.OnDialogClickListener {
@@ -70,51 +65,6 @@ class AlbumFrag : BaseFragment<FragmentAlbumBinding>(R.layout.fragment_album) {
         )
             .addToBackStack(null)
             .commit()
-    }
-
-    private fun getUserAlbumList() {
-        // user 데이터의 album Idx List 가져옴
-        MyApplication.fireStoreDB.collection(Constant.FIREBASE_DOC.USER_LIST)
-            .document(MyApplication.firebaseAuth.currentUser?.email.toString())
-            .get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    albumList = document["album_list"] as ArrayList<String>
-
-                    if (albumList.size > 0) {
-                        for (i in albumList.indices) {
-                            userAlbumVM.addAlbum(albumList[i])
-                        }
-                    }
-                }
-            }
-            .addOnFailureListener { exception ->
-                Log.e("hs", "get failed with ", exception)
-            }
-    }
-
-    private fun getAlbumImgList() {
-
-        MyApplication.fireStoreDB.collection(Constant.FIREBASE_DOC.ALBUM_LIST)
-            .document(MyApplication.prefs.getString(Constant.PREFERENCE_KEY.USE_ALBUM_ID, "none"))
-            .get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    for (item in imgList.indices) {
-                        userAlbumVM.addImg(
-                            AddPhotoData(
-                                user_uid = imgList[item].user_uid,
-                                url = imgList[item].url,
-                                save_type = imgList[item].save_type,
-                                date = imgList[item].date
-                            )
-                        )
-                    }
-                }
-            }
-            .addOnFailureListener { exception ->
-                Log.e("hs", "get failed with ", exception)
-            }
     }
 
     private fun initRecyclerView() {
