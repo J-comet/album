@@ -38,8 +38,8 @@ class CreateAlbumDialog : DialogFragment(), View.OnClickListener {
     private var spinnerResult = ""
     private lateinit var addBabyVM: AddBabyVM
     private lateinit var userAlbumVM: UserAlbumVM
-    private lateinit var babyList: MutableList<AddBabyData>
-    private var albumList: MutableList<String> = ArrayList()
+    private lateinit var babyList: ArrayList<AddBabyData>
+    private var albumList: ArrayList<String> = ArrayList()
     private var isName = false
     private var isRelation = false
 
@@ -88,7 +88,7 @@ class CreateAlbumDialog : DialogFragment(), View.OnClickListener {
         binding.clayoutBtnRegister.setOnClickListener(this)
 
         setSpinnerView()
-        babyList = mutableListOf()
+        babyList = arrayListOf()
 
         initRecyclerView(babyList)
 
@@ -168,7 +168,7 @@ class CreateAlbumDialog : DialogFragment(), View.OnClickListener {
 
     // 유저데이터에 album_idx 값 추가
     private fun addAlbumIdx(albumIdx: String) {
-        val albumList: MutableList<String> = ArrayList()
+        val albumList: ArrayList<String> = ArrayList()
         albumList.add(albumIdx)
 
         val data = hashMapOf("album_list" to albumList)
@@ -181,11 +181,11 @@ class CreateAlbumDialog : DialogFragment(), View.OnClickListener {
             }
 
         /**
-         * 최초 사용자는 이부분에서 앨범,사진등록 여부를 확인
+         * 최초 사용자는 이부분에서 앨범 여부를 확인
          * userAlbumVM 에 데이터 추가
          */
         for (i in albumList.indices) {
-            userAlbumVM.add(albumList[i])
+            userAlbumVM.addAlbum(albumList[i])
         }
     }
 

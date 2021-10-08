@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import hs.project.album.*
 import hs.project.album.adapter.AlbumMonthAdapter
+import hs.project.album.data.AddPhotoData
 import hs.project.album.data.AlbumMonth
 import hs.project.album.databinding.FragmentAlbumBinding
 import hs.project.album.dialog.CommonDialog
@@ -22,7 +23,8 @@ class AlbumFrag : BaseFragment<FragmentAlbumBinding>(R.layout.fragment_album) {
     private val monthList: MutableList<AlbumMonth> = ArrayList()
     private var month: Int = 0
     private lateinit var userAlbumVM: UserAlbumVM
-    private var albumList: MutableList<String> = ArrayList()
+    private var albumList: ArrayList<String> = ArrayList()
+    private var imgList: ArrayList<AddPhotoData> = ArrayList()
 
     companion object {
         const val TAG: String = "앨범 프래그먼트"
@@ -38,6 +40,7 @@ class AlbumFrag : BaseFragment<FragmentAlbumBinding>(R.layout.fragment_album) {
         if (activity != null && isAdded) {
             if (requireActivity().isNetworkConnected()) {
                 getUserAlbumList()
+                getAlbumImgList()
             } else {
                 val dialog = CommonDialog(requireActivity().resString(R.string.str_network_fail))
                 dialog.show(childFragmentManager, "CommonDialog")
@@ -48,7 +51,6 @@ class AlbumFrag : BaseFragment<FragmentAlbumBinding>(R.layout.fragment_album) {
                 })
             }
         }
-
 
         setView02Fragment()
 
@@ -61,7 +63,7 @@ class AlbumFrag : BaseFragment<FragmentAlbumBinding>(R.layout.fragment_album) {
         month = getCurMonth().toInt()
     }
 
-    fun setView02Fragment(){
+    fun setView02Fragment() {
         childFragmentManager.beginTransaction().replace(
             R.id.flayout_album_container,
             AlbumView02Frag.newInstance()
@@ -78,8 +80,35 @@ class AlbumFrag : BaseFragment<FragmentAlbumBinding>(R.layout.fragment_album) {
             .addOnSuccessListener { document ->
                 if (document.exists()) {
                     albumList = document["album_list"] as ArrayList<String>
-                    for (i in albumList.indices) {
-                        userAlbumVM.add(albumList[i])
+
+                    if (albumList.size > 0) {
+                        for (i in albumList.indices) {
+                            userAlbumVM.addAlbum(albumList[i])
+                        }
+                    }
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("hs", "get failed with ", exception)
+            }
+    }
+
+    private fun getAlbumImgList() {
+
+        MyApplication.fireStoreDB.collection(Constant.FIREBASE_DOC.ALBUM_LIST)
+            .document(MyApplication.prefs.getString(Constant.PREFERENCE_KEY.USE_ALBUM_ID, "none"))
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    for (item in imgList.indices) {
+                        userAlbumVM.addImg(
+                            AddPhotoData(
+                                user_uid = imgList[item].user_uid,
+                                url = imgList[item].url,
+                                save_type = imgList[item].save_type,
+                                date = imgList[item].date
+                            )
+                        )
                     }
                 }
             }

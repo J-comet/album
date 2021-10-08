@@ -8,7 +8,7 @@ object Constant {
     interface PREFERENCE_KEY {
         companion object {
             const val LOGIN_USER_ID = "current_uid"
-            const val USE_ALBUM_ID = "album_uid"  // 현재 사용중인 앨범 uid
+            const val USE_ALBUM_ID = "current_album_uid"  // 현재 사용중인 앨범 uid
         }
     }
 

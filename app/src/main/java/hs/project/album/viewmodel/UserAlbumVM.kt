@@ -2,29 +2,38 @@ package hs.project.album.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import hs.project.album.data.AddPhotoData
 
 class UserAlbumVM : ViewModel() {
 
-//    val vmAlbumList = MutableLiveData<MutableList<String>?>()
+    var vmAlbumList = MutableLiveData<ArrayList<String>?>()
+    var albumItems: ArrayList<String> = ArrayList()
 
-//    fun setData(albumList: MutableList<String>) {
-//        vmAlbumList.value = albumList
-//    }
+    var vmImgList = MutableLiveData<ArrayList<AddPhotoData>?>()
+    var imgItems: ArrayList<AddPhotoData> = ArrayList()
 
-    var vmAlbumList = MutableLiveData<MutableList<String>?>()
-    var items: MutableList<String> = ArrayList()
-
-    fun add(item: String) {
-        items.add(item)
-        vmAlbumList.value = items
+    fun addAlbum(item: String) {
+        albumItems.add(item)
+        vmAlbumList.value = albumItems
     }
 
-    fun remove(item: String) {
-        items.remove(item)
-        vmAlbumList.value = items
+    fun removeAlbum(item: String) {
+        albumItems.remove(item)
+        vmAlbumList.value = albumItems
+    }
+
+    fun addImg(item: AddPhotoData) {
+        imgItems.add(item)
+        vmImgList.value = imgItems
+    }
+
+    fun removeImg(item: AddPhotoData) {
+        imgItems.remove(item)
+        vmImgList.value = imgItems
     }
 
     fun clear() {
         vmAlbumList.value = null
+        vmImgList.value = null
     }
 }

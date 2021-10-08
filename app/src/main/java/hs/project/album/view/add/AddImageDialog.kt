@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.google.firebase.auth.FirebaseAuth
@@ -24,6 +25,7 @@ import hs.project.album.util.getCurrentDateTime
 import hs.project.album.util.hide
 import hs.project.album.util.visible
 import hs.project.album.view.MainActivity
+import hs.project.album.viewmodel.UserAlbumVM
 import java.io.IOException
 import java.util.*
 import kotlin.collections.ArrayList
@@ -35,6 +37,7 @@ class AddImageDialog(selectedImgUri: Uri) : DialogFragment(), View.OnClickListen
     private var saveType = "none"
     private val selectedUri = selectedImgUri
     private var imgList = arrayListOf<AddPhotoData>()
+    private lateinit var userAlbumVM: UserAlbumVM
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,6 +56,7 @@ class AddImageDialog(selectedImgUri: Uri) : DialogFragment(), View.OnClickListen
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        userAlbumVM = ViewModelProvider(requireActivity()).get(UserAlbumVM::class.java)
         init()
     }
 
@@ -173,7 +177,22 @@ class AddImageDialog(selectedImgUri: Uri) : DialogFragment(), View.OnClickListen
                 if (document.exists()) {
                     imgList = document["image_list"] as ArrayList<AddPhotoData>
                     imgList.add(imgFile)
-                    imgUpload(imgList)
+
+                    if (imgList.size > 0) {
+                        for (item in imgList.indices) {
+                            userAlbumVM.addImg(
+                                AddPhotoData(
+                                    user_uid = imgList[item].user_uid,
+                                    url = imgList[item].url,
+                                    save_type = imgList[item].save_type,
+                                    date = imgList[item].date
+                                )
+                            )
+                        }
+
+                        imgUpload(imgList)
+                    }
+
                 }
             }
             .addOnFailureListener { exception ->
@@ -182,7 +201,7 @@ class AddImageDialog(selectedImgUri: Uri) : DialogFragment(), View.OnClickListen
 
     }
 
-    private fun imgUpload(imgList: ArrayList<AddPhotoData>){
+    private fun imgUpload(imgList: ArrayList<AddPhotoData>) {
         val data = hashMapOf("image_list" to imgList)
 
         MyApplication.fireStoreDB.collection(Constant.FIREBASE_DOC.ALBUM_LIST)
@@ -245,15 +264,16 @@ class AddImageDialog(selectedImgUri: Uri) : DialogFragment(), View.OnClickListen
                         // fireStore 'album_list' 문서의 'image_list' 에 'AddPhotoData' 저장
                         getAlbumImgList(
                             AddPhotoData(
-                            user_uid = MyApplication.firebaseAuth.currentUser?.uid,
+                                user_uid = MyApplication.firebaseAuth.currentUser?.uid,
 //                            album_uid = MyApplication.prefs.getString(
 //                                Constant.PREFERENCE_KEY.USE_ALBUM_ID,
 //                                "none"
 //                            ),
-                            url = url,
-                            save_type = saveType,
-                            date = getCurrentDateTime()
-                        ))
+                                url = url,
+                                save_type = saveType,
+                                date = getCurrentDateTime()
+                            )
+                        )
 
                     },
                     errorHandler = {

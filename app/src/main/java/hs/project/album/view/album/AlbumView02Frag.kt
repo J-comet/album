@@ -8,6 +8,7 @@ import hs.project.album.BaseFragment
 import hs.project.album.Constant
 import hs.project.album.MyApplication
 import hs.project.album.R
+import hs.project.album.data.AddPhotoData
 import hs.project.album.databinding.FragmentAlbumView02Binding
 import hs.project.album.dialog.CommonDialog
 import hs.project.album.dialog.CreateAlbumDialog
@@ -17,11 +18,8 @@ import hs.project.album.viewmodel.UserAlbumVM
 class AlbumView02Frag : BaseFragment<FragmentAlbumView02Binding>(R.layout.fragment_album_view_02),
     View.OnClickListener {
 
-    private var albumList: MutableList<String> = ArrayList()
+    private var albumList: ArrayList<String> = ArrayList()
     private lateinit var userAlbumVM: UserAlbumVM
-    private var noneAlbum = false  // 앨범 없는 사용자
-    private var hasAlbumNoneImg = false // 앨범은 있고 이미지는 등록 전 사용자
-    private var hasImg = false // 앨범, 이미지 등록 사용자
 
     companion object {
         const val TAG = "AlbumViewPager02"
@@ -35,26 +33,22 @@ class AlbumView02Frag : BaseFragment<FragmentAlbumView02Binding>(R.layout.fragme
         userAlbumVM = ViewModelProvider(requireActivity()).get(UserAlbumVM::class.java)
         init()
 
+        // 현재 앨범리스트에 변화가 없으므로 이미지를 추가했을 때 MainView 상태가 변화가 없음
         /**
-         *
-         * ViewModel LifeData 로 실시간 데이터 변경 감지
-         *
-         * user 가 가지고 있는 앨범 idx 값을 가지고
-         * 앨범의 idx 값들을 비교해야됨
-         * 1. user 데이터 의 album_list 가지고오기
-         * 2. for 문으로 존재하는 문서인지 검사
-         * 3. 앨범에 image_list 값 있는지 검사
+         * 해결방안
+         * 이미지리스트에 변화가 있을 때 .observe 하기
+         * 앨범리스트에 다른 값을 추가해서 이미지 리스트에 변화가 있음을 감지하도록 설정 하기
          */
-
         userAlbumVM.vmAlbumList.observe(viewLifecycleOwner, { list ->
 
             (parentFragment as? AlbumFrag)?.visibleLoading()
 
             if (activity != null && isAdded) {
                 if (requireActivity().isNetworkConnected()) {
-                    list?.let { it -> checkMyAlbum(it) }
+                    list?.let { checkMyAlbum() }
                 } else {
-                    val dialog = CommonDialog(requireActivity().resString(R.string.str_network_fail))
+                    val dialog =
+                        CommonDialog(requireActivity().resString(R.string.str_network_fail))
                     dialog.show(childFragmentManager, "CommonDialog")
                     dialog.setOnClickListener(object : CommonDialog.OnDialogClickListener {
                         override fun onClicked() {
@@ -64,11 +58,54 @@ class AlbumView02Frag : BaseFragment<FragmentAlbumView02Binding>(R.layout.fragme
                 }
             }
         })
+
+        userAlbumVM.vmImgList.observe(viewLifecycleOwner, { list ->
+            (parentFragment as? AlbumFrag)?.visibleLoading()
+
+            if (activity != null && isAdded) {
+                if (requireActivity().isNetworkConnected()) {
+                    list?.let { checkMyAlbum() }
+                } else {
+                    val dialog =
+                        CommonDialog(requireActivity().resString(R.string.str_network_fail))
+                    dialog.show(childFragmentManager, "CommonDialog")
+                    dialog.setOnClickListener(object : CommonDialog.OnDialogClickListener {
+                        override fun onClicked() {
+                            dialog.dismiss()
+                        }
+                    })
+                }
+            }
+        })
+
     }
 
     fun init() {
         binding.noneAlbum.setOnClickListener(this)
-        getUserAlbumList()
+
+        // 서버에 저장되어 있는 앨범 중 현재 preference 에 저장되어 있는 앨범의
+        // imageList 에 이미지 없을 때 getUserAlbumList() 함수 실행
+
+        var imgList: ArrayList<String> = ArrayList()
+
+        MyApplication.fireStoreDB.collection(Constant.FIREBASE_DOC.ALBUM_LIST)
+        .document(MyApplication.prefs.getString(Constant.PREFERENCE_KEY.USE_ALBUM_ID, "none"))
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    imgList = document["image_list"] as ArrayList<String>
+
+                    if (imgList.size > 0 && imgList.isNotEmpty()) {
+                        mainViewStatus(noneAlbum = false, hasAlbumNoneImg = false, hasImg = true)
+                    } else {
+                        getUserAlbumList()
+                    }
+                }
+                else {
+                    mainViewStatus(noneAlbum = true, hasAlbumNoneImg = false, hasImg = false)
+                }
+            }
+
     }
 
     private fun mainViewStatus(noneAlbum: Boolean, hasAlbumNoneImg: Boolean, hasImg: Boolean) {
@@ -127,27 +164,14 @@ class AlbumView02Frag : BaseFragment<FragmentAlbumView02Binding>(R.layout.fragme
             .get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
-                    noneAlbum = false
-                    hasAlbumNoneImg = false
-                    hasImg = false
-
                     albumList = document["album_list"] as ArrayList<String>
 
-                    if (albumList.size > 0 || albumList.isNotEmpty()) {
-                        hasAlbumNoneImg = true
-
-                        /**
-                         * 앨범,이미지 전부 있을 때 비교할 값 설정 필요
-                         */
-                        /*if (){
-
-                        }*/
-
-                    } else {
-                        noneAlbum = true
+                    if (albumList.size > 0 && albumList.isNotEmpty()) {
+                        mainViewStatus(noneAlbum = false, hasAlbumNoneImg = true, hasImg = false)
                     }
 
-                    mainViewStatus(noneAlbum, hasAlbumNoneImg, hasImg)
+                } else {
+                    mainViewStatus(noneAlbum = true, hasAlbumNoneImg = false, hasImg = false)
                 }
             }
             .addOnFailureListener { exception ->
@@ -155,39 +179,36 @@ class AlbumView02Frag : BaseFragment<FragmentAlbumView02Binding>(R.layout.fragme
             }
     }
 
-    private fun checkMyAlbum(albumList: MutableList<String>) {
+    private fun checkMyAlbum() {
 
-        var imageList: MutableList<String> = ArrayList()
-
-        noneAlbum = false
-        hasAlbumNoneImg = false
-        hasImg = false
+        var imageList: ArrayList<String> = ArrayList()
 
         // 가입되어 있는 앨범이 있는지 검사
-        for (item in albumList) {
+//        for (item in albumList) {
             MyApplication.fireStoreDB.collection(Constant.FIREBASE_DOC.ALBUM_LIST)
-                .document(item)
+                .document(MyApplication.prefs.getString(Constant.PREFERENCE_KEY.USE_ALBUM_ID,"none"))
                 .get()
                 .addOnSuccessListener { document ->
                     if (document.exists()) {  // 만들었거나 초대받은 앨범이 존재
 
-                        imageList = document["image_list"] as MutableList<String>
+                        imageList = document["image_list"] as ArrayList<String>
 
-                        if (imageList.size > 1) {  // 이미지가 있을 때
-                            hasImg = true
+                        if (imageList.size > 0) {  // 이미지가 있을 때
+                            mainViewStatus(noneAlbum = false, hasAlbumNoneImg = false, hasImg = true)
+
                         } else {  // 이미지가 없을 때
-                            hasAlbumNoneImg = true
+                            mainViewStatus(noneAlbum = false, hasAlbumNoneImg = true, hasImg = false)
                         }
 
                     } else {  // 앨범 존재하지 않음
-                        noneAlbum = true
+                        mainViewStatus(noneAlbum = true, hasAlbumNoneImg = false, hasImg = false)
                     }
-                    mainViewStatus(noneAlbum, hasAlbumNoneImg, hasImg)
+
                 }
                 .addOnFailureListener { exception ->
                     Log.d("hs", "get failed with ", exception)
                 }
-        }
+//        }
 
         (parentFragment as? AlbumFrag)?.hideLoading()
     }
